@@ -1,0 +1,159 @@
+@import "@/styles/mixin.scss";
+
+.icon-collapse {
+  @include iconMixin(-419px, -363px, 10px, 10px);
+}
+.icon-drop {
+  @include iconMixin(-419px, -363px, 10px, 10px);
+}
+
+.icon-add-file {
+  @include iconMixin(-274px, -458px, 44px, 44px);
+}
+.icon-arrow-right {
+  @include iconMixin(-84px, -361px, 8px, 14px);
+}
+.icon-arrow-left {
+  @include iconMixin(-36px, -361px, 8px, 14px);
+}
+.icon-arrow-top {
+  @include iconMixin(-84px, -361px, 8px, 14px);
+  transform: rotate(90deg);
+}
+.icon-arrow-bottom {
+  @include iconMixin(-36px, -361px, 8px, 14px);
+  transform: rotate(90deg);
+}
+
+.icon-triangle {
+  @include iconMixin(-852px, -365px, 8px, 5px);
+}
+
+.icon-triangle-gray {
+  @include iconMixin(-1756px, -317px, 8px, 5px);
+}
+.icon-notification {
+  @include iconMixin(-257px, -88px, 22px, 25px);
+}
+
+.icon-setting {
+  @include iconMixin(-144px, -88px, 24px, 24px);
+}
+.icon-arrow-down-small {
+  @include iconMixin(-1078px, -38px, 9px, 6px);
+}
+.icon-close-gray {
+  @include iconMixin(-147px, -147px, 18px, 18px);
+}
+
+.icon-success {
+  @include iconMixin(-848px, -312px, 16px, 16px);
+}
+
+.icon-list {
+  background: url("@/assets/iconMenu.webp") no-repeat -3px -160px;
+  width: 18px;
+  height: 15px;
+}
+.icon-close-white {
+  @include iconMixin(-1321px, -362px, 13px, 12px);
+}
+.icon-setting-small {
+  background: url("@/assets/iconSprite.png") no-repeat 0 -672px;
+  width: 16px;
+  height: 16px;
+}
+.icon-add {
+  background: url("@/assets/iconSprite.png") no-repeat -1px -2416px;
+  width: 15px;
+  height: 15px;
+}
+.icon-replication {
+  background: url("@/assets/iconSprite.png") no-repeat 0 -2096px;
+  width: 16px;
+  height: 16px;
+}
+
+.icon-edit {
+  background: url("@/assets/iconSprite.png") no-repeat 0 -1872px;
+  width: 15px;
+  height: 15px;
+}
+
+.icon-remove {
+  background: url("@/assets/iconSprite.png") no-repeat -2px -2683px;
+  width: 12px;
+  height: 11px;
+}
+
+.icon-reload {
+  background: url("@/assets/iconSprite.png") no-repeat 0 -2586px;
+  width: 16px;
+  height: 13px;
+}
+
+.icon-zoom-white {
+  background: url("@/assets/icon/tool-sprites.png") no-repeat 0 -32px;
+  width: 16px;
+  height: 16px;
+}
+.icon-close-white {
+  background: url("@/assets/icon/tool-sprites.png") no-repeat 0 0;
+  width: 16px;
+  height: 16px;
+}
+
+.icon-add {
+  background: url("@/assets/iconSprite.png") no-repeat -1px -2648px;
+  width: 14px;
+  height: 16px;
+}
+
+.icon-help {
+  background: url("@/assets/iconSprite.png") no-repeat 0 -1600px;
+  width: 16px;
+  height: 16px;
+}
+
+.icon-stock {
+  background: url("@/assets/iconMenu.webp") no-repeat -4px -40px;
+  width: 19px;
+  height: 20px;
+}
+.icon-unit {
+  background: url("@/assets/iconMenu.webp") no-repeat -5px -5px;
+  width: 20px;
+  height: 16px;
+}
+
+.icon-sum {
+  background: url("@/assets/iconSprite.png") no-repeat 0 -960px;
+  width: 15px;
+  height: 15px;
+}
+.icon-checkbox-default {
+  background: url("@/assets/imgs/checkbox.webp") no-repeat -1px -1px;
+  width: 13px;
+  height: 13px;
+}
+.icon-checkbox-focus-nocheck {
+  background: url("@/assets/imgs/checkbox.webp") no-repeat -16px -1px;
+  width: 13px;
+  height: 13px;
+}
+.icon-checkbox-nofocus-check {
+  background: url("@/assets/imgs/checkbox.webp") no-repeat -1px -15px;
+  width: 14px;
+  height: 14px;
+}
+.icon-checkbox-focus-check {
+  background: url("@/assets/imgs/checkbox.webp") no-repeat -16px -15px;
+  width: 14px;
+  height: 14px;
+}
+
+.icon-arrowdown-gray {
+  background: url("@/assets/imgs/trigger.webp") no-repeat -7px -9px;
+  width: 8px;
+  height: 4px;
+}

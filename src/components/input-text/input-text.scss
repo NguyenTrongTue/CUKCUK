@@ -1,0 +1,126 @@
+.input-default {
+  position: relative;
+  min-width: 50px;
+}
+.input-default.error:hover .input-error {
+  display: block;
+}
+.input-default.error {
+  input {
+    border-color: var(--error-color);
+  }
+}
+
+.input-error {
+  position: absolute;
+  height: var(--input-height);
+  padding: 0 8px;
+  width: fit-content;
+  white-space: nowrap;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--error-input-bc);
+  color: white;
+  border-radius: 3px;
+  font-size: var(--primary-font-size);
+  text-align: center;
+  line-height: var(--input-height);
+  z-index: 2;
+  box-shadow: 2px 2px 2px 0 #d4d7dc;
+  display: none;
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-style: solid;
+    border-width: 5px 5px;
+    border-color: transparent transparent var(--error-input-bc) transparent;
+  }
+}
+
+input {
+  height: var(--input-height);
+  border: 1px solid rgb(118, 118, 118);
+  font-size: var(--primary-font-size);
+  padding: 0 12px 0 8px;
+  color: var(--primary-text-color);
+  width: 100%;
+  font-family: tahoma, arial sans-serif;
+  &::placeholder {
+    font-style: italic;
+  }
+}
+.input-icon-error {
+  margin: 0 5px;
+}
+
+.input-default + .input-default {
+  margin-left: 22px;
+}
+
+// Css for label
+.input-label-wrapper {
+  margin-bottom: 3px;
+  flex: 0 0 120px;
+  .input-required {
+    color: red;
+    font-size: var(--primary-font-size);
+  }
+}
+.input-label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.input:focus {
+  border-color: var(--primary-btn--active-bc);
+  outline: 1px solid transparent;
+}
+.input.error:focus {
+  border-color: red;
+}
+
+.input::placeholder {
+  color: rgb(216, 213, 213);
+}
+.input-icon {
+  display: flex;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-600);
+  cursor: pointer;
+}
+.input-icon input {
+  padding-right: 40px;
+}
+
+.input,
+textarea {
+  border: 1px solid #c1c1c1;
+  width: 100%;
+  padding: 3px 5px 3px;
+  &:focus {
+    border: 1px solid #0072bc;
+  }
+  &:hover {
+    outline: 1px solid #e2e2e2;
+  }
+}
+input {
+  min-height: 24px;
+}
+
+textarea {
+  min-height: 48px;
+  resize: none;
+  font-family: "tohama", sans-serif;
+}

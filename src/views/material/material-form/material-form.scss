@@ -1,0 +1,119 @@
+.popup {
+  background-color: #0072bc;
+  padding: 5px;
+  border-radius: 4px;
+  width: 750px;
+  border-top: 0;
+  overflow: hidden;
+}
+.popup__header {
+  height: 30px;
+  cursor: all-scroll;
+  .popup__header-right {
+    font-size: 13px;
+    color: white;
+  }
+  .popup__header-left {
+    gap: 8px;
+    .popup__header-icon {
+      cursor: pointer;
+      margin-right: 4px;
+    }
+  }
+}
+
+.popup__content {
+  padding: 8px 8px 0px;
+  background-color: white;
+  .popup__content-detail {
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+  .form-row {
+    margin-bottom: 9px;
+  }
+}
+.popup__tab {
+  height: 28px;
+  width: 100%;
+  background-color: #f5f5f5;
+  margin-bottom: 4px;
+}
+.popup__tab-item {
+  padding: 5px 8px;
+  border-left: 1px solid #d3d3d3;
+  border-right: 1px solid #d3d3d2;
+  border-top: 2px solid #0072bc;
+  font-size: 13px;
+  background-color: #fff;
+  height: 100%;
+  line-height: 28px;
+  color: #0072bc;
+}
+
+.unit-container__table {
+  height: 180px;
+  overflow-y: overlay;
+  position: relative;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  table {
+    border: 0;
+    th {
+      height: 30px;
+    }
+  }
+}
+
+.add-row {
+  gap: 8px;
+  padding: 2px 2px 8px;
+}
+.popup__footer {
+  padding: 8px;
+  background-color: white;
+}
+.popup__footer-right {
+  gap: 8px;
+}
+
+.unfollow {
+  background-color: white;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 40px;
+  .unfollow__label {
+    font-size: 13px;
+    margin-left: 8px;
+    margin-bottom: 1px;
+  }
+}
+
+.modal-context {
+  box-shadow: rgb(136, 136, 136) 0px 0px 6px;
+  background-color: white;
+  position: fixed;
+  z-index: 9999;
+  border-radius: 2px;
+  .modal-content__item {
+    padding: 0px 10px 0px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 24px;
+    cursor: pointer;
+    .modal-content__item-label {
+      margin-left: 6px;
+      font-size: 13px;
+    }
+    &.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    &:hover {
+      background: #d6e8f6;
+    }
+  }
+}

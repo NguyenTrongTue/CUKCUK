@@ -1,0 +1,95 @@
+@import "@/styles/mixin.scss";
+
+.dropdown {
+  position: relative;
+  width: 100%;
+  input {
+    font-family: "tahoma";
+    width: 100%;
+  }
+  &.medium {
+    input {
+      color: white;
+      padding-left: 12px;
+      padding-right: 40px;
+      border: 0;
+      height: 32px;
+      background-color: #005082;
+
+      &:hover {
+        outline: 0;
+      }
+    }
+    .dropdown-icon {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &.small {
+    input {
+      padding-left: 8px;
+      padding-right: 24px;
+      border: 0;
+      height: 24px;
+      background-color: white;
+      border: 1px solid #ccc;
+      color: black;
+      &:hover {
+        outline: 0;
+      }
+    }
+    .dropdown-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .dropdown-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 0px;
+    top: 0;
+    border: 1px solid transparent;
+
+    div {
+      @include transition;
+    }
+  }
+  &.show {
+    .icon-arrow {
+      transform: rotate(180deg);
+      @include transition;
+    }
+  }
+}
+.dropdown-list {
+  position: fixed;
+  max-height: 170px;
+  width: 100%;
+  padding-top: 2px;
+  padding-bottom: 4px;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 2px;
+  display: block;
+  box-shadow: rgb(136, 136, 136) 0px 0px 6px;
+  animation: push 0.3s ease;
+  z-index: 999;
+  .dropdown-item {
+    line-height: 28px;
+    padding: 0 14px 0 10px;
+    align-items: center;
+    padding-left: 8px;
+    height: 24px;
+    @include fontSizeAndColorDefault;
+    font-weight: 400;
+    cursor: pointer;
+    &:hover {
+      background: #d6e8f6;
+    }
+    &.selected {
+      background-color: #c1ddf1;
+    }
+  }
+}

@@ -1,0 +1,83 @@
+@keyframes push-action {
+  from {
+    transform: translate(-86%, 10%);
+  }
+  to {
+    transform: translate(-86%, 0%);
+  }
+}
+
+@keyframes push {
+  from {
+    transform: translateY(20%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
+@keyframes modal {
+  from {
+    transform: translate(-50%, -80%);
+  }
+  to {
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes modal-right {
+  from {
+    transform: translateX(80%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes rotateKeyFrame {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(30deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skeleton {
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes show_slide {
+  0% {
+    transform: translateX(100%);
+  }
+  40% {
+    transform: translateX(-10%);
+  }
+  80% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-10px);
+  }
+}
+
+@keyframes hide_slide {
+  0% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(0%);
+  }
+  80% {
+    transform: translateX(-10%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}

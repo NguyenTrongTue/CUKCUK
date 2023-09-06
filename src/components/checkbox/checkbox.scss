@@ -1,0 +1,23 @@
+@import "@/styles/mixin.scss";
+
+/* Check box */
+.checkbox-container {
+  display: block;
+  position: relative;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  font-size: 22px;
+  border: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  input {
+    position: absolute;
+    opacity: 0;
+    height: 0;
+    width: 0;
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,142 @@
+.dp__instance_calendar {
+  font-family: tahoma, arial sans-serif;
+}
+
+.date-picker {
+  input {
+    font-size: 13px;
+    border-radius: 1px;
+    border: 1px solid var(--border-color);
+    font-family: tahoma, arial sans-serif;
+
+    padding: 2px 6px 0px 30px;
+    line-height: 24px;
+    &:focus {
+      border-color: #3e9bdd;
+    }
+  }
+  .icon {
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    &:hover {
+      background-color: #e7e5e5;
+    }
+  }
+}
+.action-row {
+  width: 100%;
+  cursor: pointer;
+  padding-top: 8px;
+  padding-bottom: 10px;
+  font-family: "notosans", sans-serif;
+  span {
+    margin: auto;
+    font-size: 13px;
+    color: #2ca01c;
+  }
+}
+.dp__clear_icon {
+  display: none !important;
+}
+.dp__input_icons {
+  padding: 0 8px !important;
+}
+.dp__instance_calendar {
+  font-size: 13px;
+  .dp__btn {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .dp__button {
+    display: none;
+  }
+  .dp__calendar_header_item {
+    color: #757575;
+  }
+  .dp__selection_preview {
+    font-size: 13px;
+  }
+}
+.dp__cell_inner {
+  border-radius: 50% !important;
+}
+.dp__active_date {
+  color: #2ca01c !important;
+  background-color: rgba(44, 160, 28, 0.2) !important;
+}
+.dp__today {
+  border: none !important;
+}
+.dp__action_row {
+  padding: 0 !important;
+}
+.dp__date_hover:hover {
+  border: 1px solid var(--primary-btn-bc) !important;
+  background-color: white !important;
+}
+
+.custom-month-year-component {
+  width: 100%;
+}
+.datepicker-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .month-year-label {
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+.calendar-select {
+  background-color: var(--primary-btn-bc);
+  z-index: 999 !important;
+  border-radius: 22px;
+  position: absolute;
+  top: 48px;
+  left: 8px;
+  width: 94%;
+
+  table {
+    width: 100%;
+    margin: 28px 0;
+    td {
+      width: 36px;
+      height: 36px;
+
+      color: white;
+      margin: 0 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      &:hover {
+        background-color: white;
+        color: var(--primary-btn-bc);
+        border-radius: 4px;
+      }
+      .selected {
+        background-color: white;
+        color: var(--primary-btn-bc);
+        padding: 10px 0px;
+        border-radius: 20px;
+      }
+    }
+  }
+}
+.selected-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  span {
+    font-weight: 700;
+    text-align: center;
+  }
+}

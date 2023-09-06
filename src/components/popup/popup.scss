@@ -1,0 +1,40 @@
+.dialog {
+  padding: 5px;
+  background-color: #0072bc;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.dialog__header {
+  height: 30px;
+  width: calc(100% + 2px);
+  z-index: 99999;
+  cursor: all-scroll;
+
+  .dialog__header-content {
+    font-size: 13px;
+    color: white;
+    line-height: 26px;
+  }
+}
+
+.popup__header-icon {
+  margin-right: 4px;
+}
+.dialog__container-content {
+  min-height: 50px;
+}
+
+.dialog-description {
+  font-size: 13px;
+  margin-left: 12px;
+}
+
+.dialog-footer {
+  gap: 8px;
+  margin-top: 10px;
+}
+.dialog__container {
+  background-color: white;
+  padding: 10px;
+}

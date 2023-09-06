@@ -1,0 +1,119 @@
+.sidebar.zoom-out + .main-content {
+  width: calc(100% - var(--sidebar-width-zoom-out));
+}
+
+/*  RESIZE */
+.border-rounded {
+  border-radius: 30px !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.ml-12 {
+  margin-left: 12px;
+}
+
+/* Display Flex */
+.flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Css text align */
+.txt-align-right {
+  text-align: right;
+}
+
+.txt-align-left {
+  text-align: left;
+}
+.txt-align-enter {
+  text-align: center;
+}
+
+/* CSS for */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 3;
+}
+.modal-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  animation: modal 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.modal-header span {
+  font-size: 20px;
+  font-weight: 700;
+}
+.modal-close {
+  cursor: pointer;
+}
+
+/* Grid */
+.grid {
+  max-width: 100%;
+}
+.grid_row {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.grid__column-2 {
+  width: 16.67%;
+}
+.grid__column-3 {
+  width: 25%;
+}
+
+.grid__column-6 {
+  width: 50%;
+}
+
+.grid__column-4 {
+  width: 33.33%;
+}
+
+.grid__column-8 {
+  width: 66.67%;
+}
+
+.tippy-content {
+  font-size: 13px !important;
+}
+.tippy-box {
+  background-color: #505050;
+}
