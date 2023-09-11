@@ -22,6 +22,25 @@ class MaterialExcelService {
       return createBlobFromResponse(response);
     });
   }
+
+  /**
+   * Hàm lấy file kiểm tra dữ liệu từ backend.
+   * @param {FormData} formData file gửi lên server
+   * @returns Thông tin các sheets trong file
+   * @author: nttue (20/07/2023)
+   */
+  async getCheckFileAsync(fileId) {
+    return tryCatchWrapper(async () => {
+      const response = await axios.post(
+        `${this.endpoint}/GetCheckFile?fileId=${fileId}`,
+        {},
+        {
+          responseType: "blob",
+        }
+      );
+      return createBlobFromResponse(response);
+    });
+  }
   /**
    * Hàm lấy file mẫu từ backend.
    * @returns Trả dữ liệu file dưới dạng blob.
@@ -61,24 +80,6 @@ class MaterialExcelService {
   async validateFileAsync(fileId) {
     return tryCatchWrapper(async () => {
       return request.post(`${this.endpoint}/ValidateFile?fileId=${fileId}`);
-    });
-  }
-
-  /**
-   * Hàm lấy thông tin các sheet từ backend
-   * @param {FormData} formData file gửi lên server
-   * @returns Thông tin các sheets trong file
-   * @author: nttue (20/07/2023)
-   */
-  async getCheckFileAsync(fileId) {
-    return tryCatchWrapper(async () => {
-      const response = await axios.post(
-        `${this.endpoint}/GetCheckFile?fileId=${fileId}`,
-        {
-          responseType: "blob",
-        }
-      );
-      return createBlobFromResponse(response);
     });
   }
 

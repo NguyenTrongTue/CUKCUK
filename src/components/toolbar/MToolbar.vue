@@ -94,11 +94,8 @@ export default {
     };
   },
 
-  mounted() {
+  created() {
     window.addEventListener("keydown", this.handleKeyDown);
-  },
-  beforeUnmount() {
-    document.removeEventListener("keydown", this.handleKeyDown);
   },
   watch: {
     noData(newNoData) {
@@ -115,14 +112,19 @@ export default {
       const keyCode = event.keyCode;
       if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.keyOne) {
         this.onAdd();
+        event.preventDefault();
       } else if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.keyTwo) {
         this.onDuplicate();
+        event.preventDefault();
       } else if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.keyThree) {
+        event.preventDefault();
         this.onUpdate();
       } else if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.keyFour) {
         this.onRemove();
+        event.preventDefault();
       } else if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.keyFive) {
         this.onReload();
+        event.preventDefault();
       }
     },
     /**

@@ -87,23 +87,8 @@ export default {
       async handler(newFile) {
         try {
           if (newFile) {
-            this.errorFileMessage = "";
-            var formData = new FormData();
-            formData.append("formFile", newFile);
-            var checkFileResponse = await MaterialExcelService.checkFileAsync(
-              formData
-            );
             this.fileInfo.fileName = newFile.name;
-            this.fileId = checkFileResponse.Data;
-
-            if (checkFileResponse.Message === "Success") {
-              this.$emit("onFile", checkFileResponse.Data);
-            } else {
-              this.$store.commit("dialog/setErrorMessage", {
-                message: this.$MResources.InvalidImportFile,
-              });
-              this.clearFile();
-            }
+            this.$emit("onFile", newFile);
           }
         } catch (e) {
           console.log(e);

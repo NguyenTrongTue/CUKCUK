@@ -7,6 +7,7 @@ export const vi = {
   Unit: {
     UnitCode: {
       required: "Đơn vị tính không được phép để trống",
+      maxlength_10: "Đơn vị tính liệu không được phép vượt quá 10 ký tự",
     },
   },
   Stock: {
@@ -15,9 +16,11 @@ export const vi = {
     },
     StockCode: {
       required: "Mã kho không được phép để trống",
+      maxlength_10: "Mã kho không được phép vượt quá 10 ký tự",
     },
     StockName: {
       required: "Tên kho không được phép để trống",
+      maxlength_255: "Tên kho không được phép vượt quá 255 ký tự",
     },
   },
 
@@ -27,9 +30,12 @@ export const vi = {
     },
     MaterialGroupCode: {
       required: "Mã nhóm nguyên vật liệu không được phép để trống",
+      maxlength_10: "Mã nhóm nguyên vật liệu không được phép vượt quá 10 ký tự",
     },
     MaterialGroupName: {
       required: "Tên nhóm nguyên vật liệu không được phép để trống",
+      maxlength_255:
+        "Tên nhóm nguyên vật liệu không được phép vượt quá 255 ký tự",
     },
   },
   Material: {
@@ -60,9 +66,12 @@ export const vi = {
     },
   },
   ToastMessage: {
-    MaterialUpdate: "Cập nhật nguyên vật liệu thành công",
-    MaterialCreate: "Thêm mới nguyên vật liệu thành công",
-    MaterialDelete: "Xóa nguyên vật liệu thành công",
+    Material: {
+      update: "Cập nhật nguyên vật liệu thành công",
+      create: "Thêm mới nguyên vật liệu thành công",
+      delete: "Xóa nguyên vật liệu thành công",
+    },
+
     Unit: {
       update: "Cập nhật đơn vị tính thành công",
       create: "Thêm mới đơn vị tính thành công",
@@ -83,6 +92,7 @@ export const vi = {
     Unit: "Bạn có chắc chắn muốn xóa Đơn vị tính",
     Stock: "Bạn có chắc chắn muốn xóa Kho",
     MaterialGroup: "Bạn có chắc chắn muốn xóa Nhóm nguyên vật liệu",
+    Material: "Bạn có chắc chắn muốn xóa Nguyên vật liệu",
   },
   FormName: {
     Unit: {
@@ -107,6 +117,7 @@ export const vi = {
   editMaterialTitle: "Sửa nguyên vật liệu",
 
   unitConversionIsEmpty: "Đơn vị chuyển đổi không được bỏ trống.",
+  ConversionRateGreatherThanZero: "Tỉ lệ chuyển đổi phải lớn hơn 0.",
   unitIsEmpty: "Đơn vị tính không được bỏ trống.",
   ucIsDuplicatedWithUnitCode:
     "Đơn vị chuyển đổi không được trùng với đơn vị tính.",
@@ -119,8 +130,6 @@ export const vi = {
   materials: "Nguyên vật liệu",
   otherItem: "Mặt hàng khác",
   bottledDrinks: "Đồ uống đóng chai",
-
-  deleteMaterialLabel: "Bạn có chắc chắn muốn xóa Nguyên vật liệu",
 
   DataChanged: "Dữ liệu đã bị thay đổi. Bạn có muốn cất không?",
 
@@ -211,7 +220,6 @@ export const vi = {
   ImportText: "Nhập khẩu",
   ExportText: "Xuất khẩu",
   SettingText: "Cài đặt",
-  UnitConsersionGreaterThanZero: "Đơn vị chuyển đổi phải lớn hơn 0",
   SelectDataMaterial:
     "Chọn dữ liệu Nguyên vật liệu đã chuẩn bị để nhập khẩu vào phần mềm",
   Select: "Chọn",

@@ -23,7 +23,7 @@ export default {
   mounted() {
     setTimeout(() => {
       this.$store.commit("hideBackground");
-    }, 2000);
+    }, 2500);
   },
 };
 </script>

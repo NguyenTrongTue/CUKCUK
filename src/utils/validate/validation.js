@@ -14,7 +14,7 @@ export const validate = {
   required(value, message) {
     return value ? undefined : message;
   },
- 
+
   /**
    * Kiểm tra định dạng email
    */
@@ -59,5 +59,15 @@ export const validate = {
    */
   maxlength_100(value, message) {
     return !value || value.length <= 100 ? undefined : message;
+  },
+
+  /**
+   * Hàm kiểm tra xem độ dài 1 chuỗi có lơn 255 ký tự không.
+   * @param {String} value Giá trị cần kiểm
+   * @param {String} message Thông báo lỗi tương ứng.
+   * @returns Trả về thông báo lỗi nếu có, ngược lại undifined.
+   */
+  maxlength_255(value, message) {
+    return !value || value.length <= 255 ? undefined : message;
   },
 };

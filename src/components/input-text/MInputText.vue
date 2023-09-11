@@ -69,7 +69,10 @@ const ALLOWED_KEYS = [
   "F5",
 ];
 
-import { upperCaseName } from "@/utils/common";
+import {
+  convertStringToNumber,
+  convertNumberDecimalToString,
+} from "@/utils/common";
 import { validate } from "@/utils/validate/validation.js";
 export default {
   name: "InputPri",
@@ -185,6 +188,9 @@ export default {
   watch: {
     // cập nhật giá trị của giá trị ô input khi modelValue thay đổi.
     modelValue(newValue) {
+      if (newValue) {
+        this.error = "";
+      }
       this.assignDataValue(newValue);
     },
   },
@@ -197,7 +203,7 @@ export default {
     assignDataValue(value) {
       if (this.allowNumber) {
         if (value) {
-          this.dataValue = this.convertStringToNumber(
+          this.dataValue = convertStringToNumber(
             value.toString().replace(/\./g, "")
           );
         } else {
@@ -205,29 +211,7 @@ export default {
         }
       }
       if (this.allowDecimal) {
-        if (value) {
-          let check = value.toString().includes(".");
-          if (check) {
-            var spiriter = value.toString().split(".");
-
-            let partLeft = this.convertStringToNumber(
-              spiriter[0].replace(/\./g, "")
-            );
-
-            let left = partLeft ? partLeft : "0";
-
-            let partRight =
-              spiriter[1].length === 1 ? spiriter[1][0] + "0" : spiriter[1];
-
-            this.dataValue = left + "," + partRight;
-          } else {
-            this.dataValue =
-              this.convertStringToNumber(value.toString().replace(/\./g, "")) +
-              ",00";
-          }
-        } else {
-          this.dataValue = "0,00";
-        }
+        this.dataValue = convertNumberDecimalToString(value);
       } else {
         this.dataValue = value;
       }
@@ -308,9 +292,7 @@ export default {
           }
 
           if (spriter[0].replace(/\./g, "")) {
-            let partLeft = this.convertStringToNumber(
-              spriter[0].replace(/\./g, "")
-            );
+            let partLeft = convertStringToNumber(spriter[0].replace(/\./g, ""));
             let left = partLeft ? partLeft : "0";
             let partRight = "";
 
@@ -328,22 +310,12 @@ export default {
           }
         }
       } else if (this.allowNumber) {
-        result = this.convertStringToNumber(input.replace(/\./g, ""));
+        result = convertStringToNumber(input.replace(/\./g, ""));
       } else {
         result = input;
       }
       this.dataValue = result;
       this.reRender = !this.reRender;
-    },
-
-    /**
-     * Hàm thực hiển chuyển đổi giá trị từ chuỗi string sang số. ví dụ 12345 => 12.345
-     * @param {String} input giá trị đầu vào
-     * @author: nttue (29/08/2023)
-     */
-    convertStringToNumber(input) {
-      var inputFilter = input.replace(/^0+/, "");
-      return inputFilter.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     },
 
     /**

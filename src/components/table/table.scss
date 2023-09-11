@@ -43,8 +43,10 @@
       align-items: center;
       padding: 7px 10px;
       width: 100%;
-      img {
+      .sort-item {
         margin-left: 4px;
+        display: flex;
+        align-items: center;
       }
       &:hover {
         background-color: #eef6fb;

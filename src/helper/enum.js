@@ -1,7 +1,6 @@
 /**
  * Thông tin phần Enum.
  */
-
 const MEnum = {
   formMode: {
     add: 0,
@@ -49,10 +48,12 @@ const MEnum = {
     CTRL: 17,
     DELETE: 46,
     INSERT: 45,
+    SPACE: 32,
     S: 83,
     R: 82,
     E: 69,
     A: 65,
+    B: 66,
     N: 78,
     keyOne: 49,
     keyTwo: 50,
@@ -90,6 +91,20 @@ const MEnum = {
   YES_OR_NO: {
     NO: 0,
     YES: 1,
+  },
+  COMPARISON_OPERATORS: {
+    EQUAL: 9,
+    GRETHER_THAN: 5,
+    LESS_THAN: 6,
+    GREATER_THAN_OR_EQUAL: 7,
+    LESS_THAN_OR_EQUAL: 8,
+  },
+  STRING_OPERATORS: {
+    CONTAIN: 0,
+    EQUAL: 1,
+    START_BY: 2,
+    END_BY: 3,
+    ORTHER: 4,
   },
 };
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import store from "@/store";
+import MyEmitter from "tiny-emitter/instance";
 
 import { apiConfig } from "./apiConfig";
 
@@ -18,13 +19,23 @@ axiosClient.interceptors.response.use(
     const { response } = error;
     const { data } = response;
     const { Errors } = data;
-    if (!Errors || Errors.length === 0) {
-      store.commit("dialog/setErrorMessage", { message: data.userMessage });
+
+    if (data.errorCode && data.errorCode === 3) {
+      store.commit("dialog/setErrorMessage", {
+        message: data.userMessage,
+        handleClose: () => {
+          MyEmitter.emit("duplicateCode");
+        },
+      });
+    } else if (!Errors || (Errors.length === 0 && data.errorCode !== 3)) {
+      store.commit("dialog/setErrorMessage", {
+        message: data.userMessage,
+      });
     } else {
       const errorsList = Errors.map((error) => error.ErrorMessage).join(";");
       store.commit("dialog/setErrorMessage", { message: errorsList });
     }
-    return Promise.reject(error);
+    return data;
   }
 );
 export default axiosClient;

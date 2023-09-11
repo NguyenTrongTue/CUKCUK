@@ -24,7 +24,7 @@
             <mtooltip
               :content="column.tooltip"
               :arrow="false"
-              v-if="column.tooltip"
+              v-if="column.headerName !== column.dataColumnName"
             >
               <span>
                 {{ column.headerName }}
@@ -34,6 +34,7 @@
               {{ column.headerName }}
             </span>
             <mtooltip
+              class="sort-item"
               :content="contentSorting(column.headerName, 'desc')"
               :arrow="false"
               v-if="showSorting(column.field) === 'desc'"
@@ -41,6 +42,7 @@
               <img src="@/assets/imgs/sort_desc.webp" alt="" />
             </mtooltip>
             <mtooltip
+              class="sort-item"
               v-if="showSorting(column.field) === 'asc'"
               :content="contentSorting(column.headerName, 'asc')"
               :arrow="false"
@@ -137,7 +139,7 @@
     style="width: 100%"
     class="no-data flex-center"
   >
-    <img src="@/assets/icon/bg-nodata.svg" alt="" srcset="" />
+    <img src="@/assets/icon/bg-nodata.svg" alt="" />
     <p class="no-data-desc">
       {{ this.$MResources.NoData }}
     </p>
@@ -145,7 +147,7 @@
 </template>
 
 <script>
-import TypeFilter from "./type-filter/TypeFilter.vue";
+import TypeFilter from "@/components/table/type-filter/TypeFilter.vue";
 import valueConversion from "@/utils/valueConversion";
 import { resizeColumn } from "@/utils/common";
 
@@ -167,10 +169,6 @@ export default {
     loadingProp: {
       type: Boolean,
     },
-    allowEditColumns: {
-      type: Boolean,
-      deefault: true,
-    },
   },
   components: { TypeFilter },
 
@@ -180,7 +178,7 @@ export default {
       isLoading: false,
       noData: false,
       indexFilter: -1,
-      columns: this.columnsProp,
+      columns: [],
       rowChoosed: this.propsRowChoosed,
       tableHeaderHeight: 0,
 
@@ -191,27 +189,27 @@ export default {
         // Toán tử so sánh số, ngày tháng năm.
         ComparisonOperators: [
           {
-            value: 9,
+            value: this.$MEnum.COMPARISON_OPERATORS.EQUAL,
             symbol: "=",
             label: this.$MResources.equal,
           },
           {
-            value: 5,
+            value: this.$MEnum.COMPARISON_OPERATORS.GRETHER_THAN,
             symbol: ">",
             label: this.$MResources.greatherThan,
           },
           {
-            value: 6,
+            value: this.$MEnum.COMPARISON_OPERATORS.LESS_THAN,
             symbol: "<",
             label: this.$MResources.lessThan,
           },
           {
-            value: 7,
+            value: this.$MEnum.COMPARISON_OPERATORS.GREATER_THAN_OR_EQUAL,
             symbol: "≥",
             label: this.$MResources.greaterThanOrEqual,
           },
           {
-            value: 8,
+            value: this.$MEnum.COMPARISON_OPERATORS.LESS_THAN_OR_EQUAL,
             symbol: "≤",
             label: this.$MResources.lessThanOrEqual,
           },
@@ -219,27 +217,27 @@ export default {
         // Toán tử so sánh chuỗi.
         StringOperators: [
           {
-            value: 0,
+            value: this.$MEnum.STRING_OPERATORS.CONTAIN,
             symbol: "∗",
             label: this.$MResources.contain,
           },
           {
-            value: 1,
+            value: this.$MEnum.STRING_OPERATORS.EQUAL,
             symbol: "=",
             label: this.$MResources.equal,
           },
           {
-            value: 2,
+            value: this.$MEnum.STRING_OPERATORS.START_BY,
             symbol: "+",
             label: this.$MResources.startBy,
           },
           {
-            value: 3,
+            value: this.$MEnum.STRING_OPERATORS.END_BY,
             symbol: "-",
             label: this.$MResources.endBy,
           },
           {
-            value: 4,
+            value: this.$MEnum.STRING_OPERATORS.ORTHER,
             symbol: "!",
             label: this.$MResources.orther,
           },
@@ -252,8 +250,8 @@ export default {
       comboboxData: {
         UnFollowing: {
           data: [
-            { id: 0, name: this.$MResources.No },
-            { id: 1, name: this.$MResources.Yes },
+            { id: this.$MEnum.YES_OR_NO.NO, name: this.$MResources.No },
+            { id: this.$MEnum.YES_OR_NO.YES, name: this.$MResources.Yes },
           ],
         },
         Category: {
@@ -275,10 +273,16 @@ export default {
       },
       queryFilter: [],
       querySort: [],
+      oldQueryFilter: [],
     };
   },
 
   mounted() {
+    this.columns = this.columnsProp.map((item) => {
+      return {
+        ...item,
+      };
+    });
     document.addEventListener("keydown", this.handleKeyDown);
     this.handlePinned(this.columns);
     this.tableHeaderHeight =
@@ -288,6 +292,7 @@ export default {
   updated() {
     this.handlePinned(this.columns);
   },
+
   beforeUnMount() {
     document.removeEventListener("keydown", this.handleKeyDown);
   },
@@ -319,6 +324,7 @@ export default {
         var pinnedList = newColumns.filter((item) => item.pinned);
         var noPinnedList = newColumns.filter((item) => !item.pinned);
         this.columns = [...pinnedList, ...noPinnedList];
+        this.oldQueryFilter = [...newColumns];
       },
       deep: true,
     },
@@ -333,7 +339,14 @@ export default {
        * @author: nttue (20/08/2023)
        */
       handler(newColumns) {
-        newColumns.forEach((column) => {
+        var filters = newColumns.map((column) => {
+          return {
+            field: column.field,
+            typeFilterMode: column.typeFilterMode,
+            value: column.value,
+          };
+        });
+        filters.forEach((column) => {
           if (column.value || column.value === 0) {
             var findIndexField = this.queryFilter.findIndex(
               (item) => item.fieldName === column.field
@@ -358,10 +371,12 @@ export default {
               this.queryFilter.splice(findIndexField, 1);
             }
           }
-          this.$emit("filter", this.queryFilter);
         });
-        if (this.allowEditColumns) {
-          this.$store.commit("saveSettingTable", { setting: newColumns });
+
+        if (JSON.stringify(this.oldQueryFilter) !== JSON.stringify(filters)) {
+          
+          this.$emit("filter", this.queryFilter);
+          this.oldQueryFilter = filters;
         }
         this.handlePinned(this.columns);
       },
@@ -386,25 +401,43 @@ export default {
     "dataList.length": function (newLength) {
       this.noData = newLength === 0;
     },
-
-    rowChoosed(newRowChoosed) {
-      var newIndex = this.dataList.findIndex(
-        (row) => row.id === newRowChoosed.id
-      );
-      this.$nextTick(() => {
-        const dropdownItems = this.$refs.table.querySelectorAll("tr");
-        const targetItem = dropdownItems[newIndex];
-        if (targetItem) {
-          targetItem.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      });
-    },
   },
 
   methods: {
+    assingValueFilter(type) {
+      if (type === "input-allowDecimal") {
+        return {
+          typeFilterMode: 7,
+          value: 0,
+        };
+      } else if (type === "combobox") {
+        return {
+          value: 0,
+        };
+      } else {
+        return {
+          typeFilterMode: 0,
+          value: "",
+        };
+      }
+    },
+    assignFilter(columns) {
+      var filters = columns.map((column) => {
+        var result = this.assignFilter(column.typeFilter);
+        return {
+          field: column.field,
+          ...result,
+        };
+      });
+
+      return filters;
+    },
+    /**
+     * Hàm bắt sự kiện người dụng click vào ô th của thanh thead
+     * Lúc này table sẽ tự động cuộn chuột đến vị trí đó.
+     * @param {Event} index chỉ số của cột.
+     * @author: nttue (20/08/2023)
+     */
     handleScroll(index) {
       this.$nextTick(() => {
         const dropdownItems = this.$refs.table.querySelectorAll("th");
@@ -418,9 +451,10 @@ export default {
       });
     },
     /**
-     * Hàm lắng nghe sự kiện form
-     * @param {} event event của sự kiện
-     * @author nttue (20/07/2023)
+     * Hàm bắt sự kiện người dụng nhấn mũi tên lên xuống trong bảng.
+     * Lúc này hàng được chọn sẽ thay đổi theo.
+     * @param {Event} event event của sự kiện
+     * @author: nttue (20/07/2023)
      */
     handleKeyDown(event) {
       const keyCode = event.keyCode;
@@ -440,7 +474,7 @@ export default {
       }
     },
     /**
-     * Hàm thực hiện ghi cột
+     * Hàm thực hiện ghim cột
      * @author: nttue (17/07/2023)
      */
     handlePinned(columns) {
@@ -450,19 +484,23 @@ export default {
 
       pinnedList.forEach((pinnedItem) => {
         const pinnedRefs = this.$refs[pinnedItem.field];
-        const width = pinnedRefs[0].offsetWidth;
-        pinnedRefs.forEach((ref) => {
-          ref.style.left = start + "px";
-        });
+        if (pinnedRefs) {
+          var width = pinnedRefs[0].offsetWidth;
+          pinnedRefs.forEach((ref) => {
+            ref.style.left = start + "px";
+          });
+        }
         start += width;
       });
 
       // Xóa style.left trong mảng noPinnedList
       noPinnedList.forEach((noPinnedItem) => {
         const noPinnedRefs = this.$refs[noPinnedItem.field];
-        noPinnedRefs.forEach((ref) => {
-          ref.style.removeProperty("left");
-        });
+        if (noPinnedRefs) {
+          noPinnedRefs.forEach((ref) => {
+            ref.style.removeProperty("left");
+          });
+        }
       });
     },
 

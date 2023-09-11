@@ -83,6 +83,7 @@ export default {
       type: String,
       required: true,
     },
+    
   },
   data() {
     return {
@@ -110,17 +111,23 @@ export default {
   async beforeMount() {
     this.handleValidate(this.fileId);
   },
+
   methods: {
     async getExampleFile() {
       var res = await MaterialExcelService.getCheckFileAsync(this.fileId);
-      saveAs(res, `${this.$MResources.CheckResult}_${this.fileId}`);
+      saveAs(res, `${this.$MResources.CheckResult}_${this.fileId}.xlsx`);
     },
     /**
      * xử lý sự kiện resize column cho table
      * @author: nttue (20/07/2023)
      */
-    createResizableColumn(event) {
-      return resizeColumn(event, event.target, this.$refs.table);
+    createResizableColumn(event, index) {
+      return resizeColumn(
+        event,
+        event.target,
+        this.$refs.table,
+        this.columns[index]
+      );
     },
 
     /**

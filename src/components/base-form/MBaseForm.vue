@@ -31,20 +31,24 @@
           ></mbutton>
         </div>
         <div class="flex-start dialog-footer__right">
-          <mbutton
-            img="/src/assets/imgs/save.webp"
-            :label="this.$MResources.SaveText"
-            :tabindex="startTabIndex + formData.length"
-            typeButton="primary"
-            @click="handleSaveForm"
-          ></mbutton>
-          <mbutton
-            img="/src/assets/imgs/disable.webp"
-            :label="'Hủy'"
-            :tabindex="startTabIndex + formData.length + 1"
-            typeButton="primary"
-            @click="handleClose"
-          ></mbutton>
+          <mtooltip :content="'Ctrl + S'" :arrow="false">
+            <mbutton
+              img="/src/assets/imgs/save.webp"
+              :label="this.$MResources.SaveText"
+              :tabindex="startTabIndex + formData.length"
+              typeButton="primary"
+              @click="handleSaveForm"
+            ></mbutton>
+          </mtooltip>
+          <mtooltip :content="'Shift + B'" :arrow="false">
+            <mbutton
+              img="/src/assets/imgs/disable.webp"
+              :label="'Hủy'"
+              :tabindex="startTabIndex + formData.length + 1"
+              typeButton="primary"
+              @click="handleClose"
+            ></mbutton>
+          </mtooltip>
         </div>
       </div>
     </template>
@@ -64,13 +68,9 @@
  * @author: nttue (20/08/2023)
  */
 import insertError from "@/utils/validate/insertError.js";
-import GlobalDialog from "@/components/global-dialog/MGlobalDialog.vue";
 
 export default {
   emits: ["closeForm", "updateList"],
-  components: {
-    GlobalDialog,
-  },
   props: {
     // tiêu đề form.
     formHeader: {
@@ -135,35 +135,31 @@ export default {
       buttonHelpFocused: false,
     };
   },
-
   /**
-   * Thực hiện gán tên các trường cho form.
+   * Thực hiện focus vào ô input đầu tiên khi mở form.
    * @author: nttue (20/08/2023)
    */
-  created() {
+  mounted() {
+    window.addEventListener("keydown", this.handleKeyDown);
+    window.addEventListener("focusin", this.handleFocusIn);
+    this.$refs[this.formData[0].name][0].focus();
     this.formData.forEach((item) => {
       if (!this.objectEdit) {
         this.objectCreate[item.name] = "";
       }
     });
   },
-
   beforeMount() {
-    document.addEventListener("focusin", this.handleFocusIn);
-  },
-
-  /**
-   * Thực hiện focus vào ô input đầu tiên khi mở form.
-   * @author: nttue (20/08/2023)
-   */
-  mounted() {
-    this.$refs[this.formData[0].name][0].focus();
-    document.addEventListener("keydown", this.handleKeyDown);
+    this.$emitter.on("duplicateCode", () => {
+      this.$nextTick(() => {
+        this.$refs[this.formData[0].name][0].focus();
+      });
+    });
   },
 
   beforeUnMount() {
     window.removeEventListener("keydown", this.handleKeyDown);
-    document.addEventListener("focusin", this.handleFocusIn);
+    window.removeEventListener("focusin", this.handleFocusIn);
   },
 
   methods: {
@@ -189,7 +185,6 @@ export default {
      */
     handleKeyDown(event) {
       const keyCode = event.keyCode;
-      event.stopPropagation();
       if (keyCode === this.$MEnum.KEYBOARD.TAB && this.buttonHelpFocused) {
         this.$nextTick(() => {
           if (
@@ -200,6 +195,11 @@ export default {
         });
         event.preventDefault();
         this.buttonHelpFocused = false;
+      } else if (keyCode === this.$MEnum.KEYBOARD.ESC) {
+        this.closePopup();
+      } else if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.B) {
+        this.handleClose();
+        event.preventDefault();
       }
     },
 
@@ -246,28 +246,31 @@ export default {
 
           // Nếu chế độ form là thêm mới => thực hiện gọi api chèn.
           if (this.formMode === this.$MEnum.formMode.add) {
-            const newObject = await this.service.post(this.objectCreate);
+            const response = await this.service.post(this.objectCreate);
 
-            this.$emit("updateList", newObject, this.formName);
-            newObject &&
-              this.$store.dispatch("showToast", {
-                label: this.$MResources.ToastMessage[this.formName].create,
-              });
+            if (!response.errorCode) {
+              this.$emit("updateList", response, this.formName);
+              response &&
+                this.$store.dispatch("showToast", {
+                  label: this.$MResources.ToastMessage[this.formName].create,
+                });
+            }
           }
 
           // Ngược lại thì gọi api cập nhật bản ghi.
           else if (this.formMode === this.$MEnum.formMode.update) {
             if (this.isEdited()) {
-              var result = await this.service.update(
+              const response = await this.service.update(
                 this.objectCreate.id,
                 this.objectCreate
               );
-              this.$emit("updateList", this.objectCreate, this.formName);
-             
-              result &&
-                this.$store.dispatch("showToast", {
-                  label: this.$MResources.ToastMessage[this.formName].update,
-                });
+              if (!response.errorCode) {
+                this.$emit("updateList", this.objectCreate, this.formName);
+                response &&
+                  this.$store.dispatch("showToast", {
+                    label: this.$MResources.ToastMessage[this.formName].update,
+                  });
+              }
             } else {
               this.$emit("closeForm");
             }
@@ -293,13 +296,19 @@ export default {
     handleSaveForm() {
       this.handleSaveUnit();
     },
-
+    /**
+     * Hàm reset dữ liệu trong form.
+     * @author: nttue (20/08/2023)
+     */
+    handleResetDataForm() {
+      this.objectCreate = {};
+    },
     /**
      * Hàm thực hiện đóng form nhập liệu.
      * @author: nttue (20/08/2023)
      */
     handleClose() {
-      this.objectCreate = {};
+      this.handleResetDataForm();
       this.$emit("closeForm");
     },
 

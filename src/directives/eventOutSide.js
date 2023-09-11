@@ -2,7 +2,6 @@
  * Hàm xử lí sự kiện khi người dùng thao tác ra ngoài element
  * @author: nttue (20/07/2023)
  */
-
 export const customOutsideDirective = {
   mounted(el, binding) {
     const onOutsideEvent = (event) => {

@@ -34,8 +34,8 @@
             />
             <MaterialImportStep2
               v-else-if="currentStep === 2"
-              @onValidate="handleValidate"
               :fileId="fileId"
+              @onValidate="handleValidate"
             />
             <MaterialImportStep3
               :fileId="fileId"
@@ -113,25 +113,66 @@
 import MaterialImportStep1 from "@/views/material/material-import/step1/MaterialImportStep1.vue";
 import MaterialImportStep2 from "@/views/material/material-import/step2/MaterialImportStep2.vue";
 import MaterialImportStep3 from "@/views/material/material-import/step3/MaterialImportStep3.vue";
+import MaterialExcelService from "@/service/materialexcel";
 
 export default {
   components: { MaterialImportStep1, MaterialImportStep2, MaterialImportStep3 },
   name: "MaterialImport",
   data() {
     return {
+      /**
+       * Tiêu đề mô tả của từng bước.
+       */
       stepTitle: `${this.$MResources.Step} 1: ${this.$MResources.SelectResourceFile}`,
+      /**
+       * Bước bắt đầu.
+       */
       currentStep: 1,
+      /**
+       * Thuộc tính kiểm tra xem đã chọn file hay chưa.
+       */
       chooseFile: false,
+      /**
+       * Thuộc tính kiểm tra xem file kiểm tra có khớp với file mẫu trên backend không.
+       */
+      isCheckedSuccess: false,
       allValid: false,
+      /**
+       * Id của file nhận được khi gửi lên backend.
+       */
       fileId: "",
+      /**
+       * Tình trạng import file.
+       */
       success: false,
+      /**
+       * File được người dùng nhập liệu.
+       */
+      file: null,
+      /**
+       * Thuộc tính kiểm tra file đã thay đổi.
+       */
+      changedFile: false,
     };
   },
   beforeMount() {
     const fileObjectJson = JSON.stringify({});
     sessionStorage.setItem("materialImportFile", fileObjectJson);
   },
+  watch: {
+    file: {
+      handler() {
+        this.changedFile = true;
+        console.log(this.changedFile);
+      },
+      deep: true,
+    },
+  },
   methods: {
+    /**
+     * xử lý sự kiện nhập khẩu thành công.
+     * @author: nttue (20/07/2023)
+     */
     handleImportSuccess() {
       this.success = true;
     },
@@ -143,6 +184,7 @@ export default {
       this.currentStep = 3;
       this.stepTitle = `${this.$MResources.Step} 3: ${this.$MResources.ImportResult}`;
     },
+
     /**
      * xử lý sự kiện bước validate.
      * @author: nttue (20/07/2023)
@@ -154,18 +196,46 @@ export default {
      * xử lý sự kiện chọn file.
      * @author: nttue (20/07/2023)
      */
-    handleChooseFile(id) {
+    handleChooseFile(newFile) {
       this.chooseFile = true;
-      this.fileId = id;
+      this.file = newFile;
     },
     /**
      * xử lý sự kiện chuyển sang bước 2.
      * @author: nttue (20/07/2023)
      */
-    handleNextStep2() {
-      this.currentStep = 2;
-      this.stepTitle = `${this.$MResources.Step} 2: ${this.$MResources.CheckData}`;
+    async handleNextStep2() {
+      var formData = new FormData();
+      formData.append("formFile", this.file);
+      if (this.changedFile) {
+        var checkFileResponse = await MaterialExcelService.checkFileAsync(
+          formData
+        );
+
+        if (checkFileResponse.Message === "Success") {
+          this.fileId = checkFileResponse.Data;
+
+          this.currentStep = 2;
+          this.isCheckedSuccess = true;
+          this.stepTitle = `${this.$MResources.Step} 2: ${this.$MResources.CheckData}`;
+        } else {
+          this.$store.commit("dialog/setErrorMessage", {
+            message: this.$MResources.InvalidImportFile,
+          });
+          this.isCheckedSuccess = false;
+          this.fileId = "";
+        }
+      } else {
+        if (this.isCheckedSuccess) {
+          this.currentStep = 2;
+        } else {
+          this.$store.commit("dialog/setErrorMessage", {
+            message: this.$MResources.InvalidImportFile,
+          });
+        }
+      }
     },
+
     /**
      * xử lý sự kiện quay lại bước 1.
      * @author: nttue (20/07/2023)

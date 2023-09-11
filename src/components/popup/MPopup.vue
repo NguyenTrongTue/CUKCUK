@@ -44,16 +44,40 @@ export default {
       leftModal: 50,
     };
   },
+
+  /**
+   * Hàm lắng nghe sự kiện resize của windown
+   */
+  beforeMount() {
+    window.addEventListener("resize", this.handleResize);
+  },
+
+  /**
+   * Hàm hủy sự kiện resize của windown
+   */
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  },
   methods: {
+    /**
+     * Hàm xử lý sự kiện resize cửa sổ => đặt lại vị trí cho form.
+     * @author: nttue (20/07/2023)
+     */
+    handleResize() {
+      this.leftModal = 50;
+      this.topModal = 50;
+    },
+
+    /**
+     * Hàm di chuyển chuột trên cửa sổ.
+     * @param {Event} event sự kiện di chuyển chuột.
+     * @author: nttue (20/07/2023)
+     */
     handleMoveForm(event) {
       event.preventDefault();
       const startX = event.pageX;
       const startY = event.pageY;
-      const form = this.$refs.form;
       const formRect = this.$refs.form.getBoundingClientRect();
-      const paddingY = window.innerHeight - formRect.height;
-      const paddingX = window.innerWidth - formRect.width;
-
       const maxTop = Math.ceil(
         ((window.innerHeight - formRect.height / 2) / window.innerHeight) * 100
       );
@@ -85,16 +109,12 @@ export default {
       };
 
       const mouseUpHandler = () => {
-        form.removeEventListener("mousemove", handleMouseMove);
-        form.removeEventListener("mouseup", mouseUpHandler);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", mouseUpHandler);
       };
-      const handleMouseLeave = () => {
-        form.removeEventListener("mousemove", handleMouseMove);
-        form.removeEventListener("mouseleave", handleMouseLeave);
-      };
-      form.addEventListener("mousemove", handleMouseMove);
-      form.addEventListener("mouseup", mouseUpHandler);
-      form.addEventListener("mouseleave", handleMouseLeave);
+
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", mouseUpHandler);
     },
     /**
      * @description hàm xử lý sự kiện nhấn nút thoát.

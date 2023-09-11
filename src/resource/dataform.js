@@ -3,7 +3,7 @@ export const UnitFormInput = [
     label: "Đơn vị tính",
     ref: "UnitCode",
     name: "UnitCode",
-    rules: "required",
+    rules: "required|maxlength_10",
     typeInput: "input",
   },
   {
@@ -19,14 +19,14 @@ export const StockFormInput = [
     label: "Mã kho",
     ref: "StockCode",
     name: "StockCode",
-    rules: "required",
+    rules: "required|maxlength_10",
     typeInput: "input",
   },
   {
     label: "Tên kho",
     ref: "StockName",
     name: "StockName",
-    rules: "required",
+    rules: "required|maxlength_255",
     typeInput: "input",
   },
   {
@@ -42,14 +42,14 @@ export const MaterialGroupFormInput = [
     label: "Mã nhóm",
     ref: "MaterialGroupCode",
     name: "MaterialGroupCode",
-    rules: "required",
+    rules: "required|maxlength_10",
     typeInput: "input",
   },
   {
     label: "Tên nhóm",
     ref: "MaterialGroupName",
     name: "MaterialGroupName",
-    rules: "required",
+    rules: "required|maxlength_255",
     typeInput: "input",
   },
   {

@@ -1,5 +1,11 @@
 <template>
-  <label v-click-outside="handleClickOutSide" :class="'checkbox-container'">
+  <label
+    :tabindex="tabIndex"
+    v-click-outside="handleClickOutSide"
+    :class="'checkbox-container'"
+    @focus="onLabelFocus"
+    @blur="onLabelBlur"
+  >
     <input
       type="checkbox"
       :checked="required ? true : isChecked"
@@ -9,16 +15,19 @@
       @click="onChange"
     />
 
-    <div v-if="!isFocused && !isChecked" class="icon-checkbox-default"></div>
+    <div v-show="!isFocused && !isChecked" class="icon-checkbox-default"></div>
     <div
-      v-if="isFocused && !isChecked"
+      v-show="isFocused && !isChecked"
       class="icon-checkbox-focus-nocheck"
     ></div>
     <div
-      v-if="!isFocused && isChecked"
+      v-show="!isFocused && isChecked"
       class="icon-checkbox-nofocus-check"
     ></div>
-    <div v-if="isFocused && isChecked" class="icon-checkbox-focus-check"></div>
+    <div
+      v-show="isFocused && isChecked"
+      class="icon-checkbox-focus-check"
+    ></div>
   </label>
 </template>
 
@@ -47,6 +56,13 @@ export default {
       type: [Boolean, Number],
       default: false,
       required: true,
+    },
+    /**
+     * Chỉ số tabindex của checkbox
+     */
+    tabIndex: {
+      type: Number,
+      required: false,
     },
   },
   data() {
@@ -96,6 +112,13 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleClickOutSide() {
+      this.isFocused = false;
+    },
+
+    onLabelFocus() {
+      this.isFocused = true;
+    },
+    onLabelBlur() {
       this.isFocused = false;
     },
   },

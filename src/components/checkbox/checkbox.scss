@@ -2,7 +2,7 @@
 
 /* Check box */
 .checkbox-container {
-  display: block;
+  display: flex;
   position: relative;
   width: 13px;
   height: 13px;
@@ -19,5 +19,8 @@
     height: 0;
     width: 0;
     cursor: pointer;
+  }
+  &:focus-visible {
+    outline: none;
   }
 }

@@ -9,15 +9,16 @@ export default {
       buttonHelpFocused: false,
       buttonInsertRowFocused: false,
       buttonRemoveRowFocused: false,
+      checkboxUnfollowingFocused: false,
     };
   },
-  mounted() {
+  created() {
     window.addEventListener("keydown", this.handleKeyDown);
-    document.addEventListener("focusin", this.handleFocusIn);
+    window.addEventListener("focusin", this.handleFocusIn);
   },
-  beforeUnMount() {
+  beforeUnmount() {
     window.removeEventListener("keydown", this.handleKeyDown);
-    document.addEventListener("focusin", this.handleFocusIn);
+    window.removeEventListener("focusin", this.handleFocusIn);
   },
   methods: {
     /**
@@ -28,6 +29,7 @@ export default {
      */
     handleFocusIn(event) {
       const focusedElement = event.target;
+
       if (focusedElement === this.$refs.buttonCancelRef?.$el) {
         this.buttonCancelFocused = true;
       } else if (focusedElement === this.$refs.buttonSaveRef?.$el) {
@@ -40,6 +42,8 @@ export default {
         this.buttonRemoveRowFocused = true;
       } else if (focusedElement === this.$refs.buttonHelpRef?.$el) {
         this.buttonHelpFocused = true;
+      } else if (focusedElement === this.$refs.UnFollowingRef?.$el) {
+        this.checkboxUnfollowingFocused = true;
       }
     },
     /**
@@ -57,38 +61,27 @@ export default {
         this.buttonHelpFocused = false;
       } else if (keyCode === this.$MEnum.KEYBOARD.ESC) {
         this.onExit();
-      } else if (keyCode == this.$MEnum.KEYBOARD.ENTER) {
-        if (this.buttonCancelFocused) {
-          this.closeForm();
-          this.buttonCancelFocused = false;
-        } else if (this.buttonSaveFocused) {
-          this.handleSaveForm();
-          this.buttonSaveFocused = false;
-        } else if (this.buttonCancelFocused) {
-          this.handleSaveAndAdd();
-          this.buttonCancelFocused = false;
-        } else if (this.buttonInsertRowFocused) {
-          this.addRow();
-          this.buttonInsertRowFocused = false;
-        } else if (this.buttonRemoveRowFocused) {
-          this.removeRow();
-          this.buttonRemoveRowFocused = false;
-        }
+      } else if (keyCode === this.$MEnum.KEYBOARD.SPACE) {
+        this.materialEdit.UnFollowing = !this.materialEdit.UnFollowing;
       } else if (
         event.ctrlKey &&
         event.shiftKey &&
         keyCode == this.$MEnum.KEYBOARD.S
       ) {
-        event.preventDefault();
         this.handleSaveAndAdd();
       } else if (event.ctrlKey && keyCode == this.$MEnum.KEYBOARD.S) {
         event.preventDefault();
+
         this.handleSaveForm();
       } else if (event.ctrlKey && keyCode == this.$MEnum.KEYBOARD.INSERT) {
         this.addRow(event);
       } else if (event.ctrlKey && keyCode == this.$MEnum.KEYBOARD.DELETE) {
         event.preventDefault();
         this.removeRow();
+      } else if (event.shiftKey && keyCode == this.$MEnum.KEYBOARD.B) {
+        event.preventDefault();
+
+        this.closeForm();
       }
     },
   },

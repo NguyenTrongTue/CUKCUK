@@ -1,27 +1,14 @@
 <template>
-  <div class="modal">
-    <div
-      class="popup modal-container"
-      ref="form"
-      :style="{ left: leftModal + '%', top: topModal + '%' }"
-    >
-      <div class="popup__header flex-between" @mousedown="handleMoveForm">
-        <div class="popup__header-right">
-          {{
-            formMode === 1
-              ? this.$MResources.editMaterialTitle
-              : this.$MResources.addMaterialTitle
-          }}
-        </div>
-        <div class="popup__header-left flex-start">
-          <div class="popup__header-icon">
-            <div class="icon-zoom-white"></div>
-          </div>
-          <div class="popup__header-icon" @click="onExit">
-            <div class="icon-close-white"></div>
-          </div>
-        </div>
-      </div>
+  <mpopup
+    :headerTile="
+      formMode === 1
+        ? this.$MResources.editMaterialTitle
+        : this.$MResources.addMaterialTitle
+    "
+    :hasClose="true"
+    @closePopup="onExit"
+  >
+    <template #content ref="form">
       <div class="popup__content">
         <div class="popup__content-detail grid">
           <div class="grid_row form-row">
@@ -70,16 +57,8 @@
               v-model="materialEdit.MaterialGroupId"
               class="grid__column-6"
               :hasAdd="true"
-              rules="required"
               tabIndex="4"
               type="table"
-              Tiêu
-              đề
-              cột
-              trong
-              combobox
-              của
-              stock.
               :data="materialgroups"
               :columnsTable="columnsStock"
               @onAddItem="handleOpenMaterialGroupStock"
@@ -111,17 +90,9 @@
               ref="StockId"
               v-model="materialEdit.StockId"
               :hasAdd="true"
-              rules="required"
               class="grid__column-6"
               tabIndex="6"
               type="table"
-              Tiêu
-              đề
-              cột
-              trong
-              combobox
-              của
-              stock.
               :data="stocks"
               :columnsTable="columnsStock"
               @onAddItem="handleOpenFormStock"
@@ -315,9 +286,17 @@
             </mtooltip>
           </div>
         </div>
-        <div class="unfollow" v-if="formMode !== 0">
-          <mcheckbox v-model="materialEdit.UnFollowing" />
-          <span class="unfollow__label">{{ this.$MResources.UnFlowwing }}</span>
+        <div class="unfollow" v-if="formMode === this.$MEnum.formMode.update">
+          <mcheckbox
+            ref="UnFollowingRef"
+            v-model="materialEdit.UnFollowing"
+            :tabIndex="12"
+          />
+          <span
+            class="unfollow__label"
+            @click="materialEdit.UnFollowing = !materialEdit.UnFollowing"
+            >{{ this.$MResources.UnFlowwing }}</span
+          >
         </div>
       </div>
       <div class="popup__footer flex-between">
@@ -327,7 +306,7 @@
               icon="icon-help"
               :label="this.$MResources.HelpText"
               typeButton="primary"
-              tabindex="15"
+              tabindex="16"
               ref="buttonHelpRef"
             ></mbutton>
           </mtooltip>
@@ -339,7 +318,7 @@
               :label="this.$MResources.SaveText"
               typeButton="primary"
               @click="handleSaveForm"
-              tabindex="12"
+              tabindex="13"
               ref="buttonSaveRef"
             ></mbutton>
           </mtooltip>
@@ -350,7 +329,7 @@
               :label="this.$MResources.SaveAndAddText"
               typeButton="primary"
               @click="handleSaveAndAdd"
-              tabindex="13"
+              tabindex="14"
               ref="buttonSaveAndCreateRef"
             ></mbutton>
           </mtooltip>
@@ -360,15 +339,17 @@
               label="Hủy bỏ"
               typeButton="primary"
               @click="closeForm"
-              tabindex="14"
+              tabindex="15"
               ref="buttonCancelRef"
             ></mbutton>
           </mtooltip>
         </div>
       </div>
-    </div>
-    <mloading v-if="isLoading" />
-  </div>
+    </template>
+  </mpopup>
+
+  <mloading v-if="isLoading" />
+
   <mdialog
     v-if="showDialog"
     :content="dialogContent"
@@ -383,7 +364,7 @@
     :service="objectForm.service"
     :formData="objectForm.formData"
     :formName="objectForm.formName"
-    :startTabIndex="16"
+    :startTabIndex="17"
     @closeForm="handleCloseSubForm"
     @updateList="handleUpdateList"
   />
@@ -402,18 +383,20 @@ import unitService from "@/service/unit.js";
 import stockService from "@/service/stock.js";
 import materialGroupService from "@/service/materialGroup.js";
 import UnitConversionService from "@/service/UnitConversion.js";
-import GlobalDialog from "@/components/global-dialog/MGlobalDialog.vue";
 import validateFormMixin from "@/mixins/validateFormMixin.vue";
 import handleKeyDownFormMixin from "@/mixins/handleKeyDownFormMixin.vue";
 
 import MBaseForm from "@/components/base-form/MBaseForm.vue";
-import { convertNumberDecimalToString, areObjectsEqual } from "@/utils/common";
+import {
+  convertNumberDecimalToString,
+  areObjectsEqual,
+  createPrefixCode,
+} from "@/utils/common";
 
 export default {
   emits: ["onClose", "onReload"],
   mixins: [validateFormMixin, handleKeyDownFormMixin],
   components: {
-    GlobalDialog,
     MBaseForm,
   },
   props: {
@@ -461,19 +444,10 @@ export default {
 
       // Thuộc tính hiển thị dialog cảnh báo.
       showDialog: false,
-
       /**
        * Chiều cao header của bảng.
        */
       tableHeaderHeight: 0,
-      /**
-       * Vị trí top của form.
-       */
-      topModal: 50,
-      /**
-       * Vị trí left của form.
-       */
-      leftModal: 50,
       /**
        * Tên combobox đang show droplist.
        */
@@ -483,6 +457,11 @@ export default {
        * Vị trị ô thêm mới đơn vị tính.
        */
       cellAddUnit: -1,
+
+      /**
+       * Tên ô nhập liệu đang mở form thêm mới.
+       */
+      inputName: "",
       /**
        * Đối tượng trong sub-form: unit, stock, materialgroup.
        */
@@ -526,6 +505,9 @@ export default {
        * DS tên đơn vị tính.
        */
       unitsLabel: [],
+      /**
+       * Danh sách dữ liệu đơn vị tính.
+       */
       units: [],
       /**
        * Danh sách nhóm NVL.
@@ -592,9 +574,19 @@ export default {
         { id: this.$MResources.monthLabel, name: this.$MResources.monthLabel },
         { id: this.$MResources.yearLabel, name: this.$MResources.yearLabel },
       ],
+      /**
+       * Chỉ số lớn nhất của code được trả về từ backend.
+       */
+      maxCode: -1,
     };
   },
-
+  beforeMount() {
+    this.$emitter.on("duplicateCode", () => {
+      this.$nextTick(() => {
+        this.$refs["MaterialCode"].focus();
+      });
+    });
+  },
   async mounted() {
     // Thực hiện focus vào ô input đầu tiên khi mở form lên.
     this.$refs[this.refsList[0]].focus();
@@ -603,6 +595,7 @@ export default {
       this.tableHeaderHeight =
         this.$refs.tableHeader.getBoundingClientRect().height + 2;
     }
+    this.getNewMaterialCodeAsync();
   },
   async created() {
     // Lấy danh sách đơn vị đơn vị tính, kho, nhóm nguyên vật liệu.
@@ -621,53 +614,11 @@ export default {
 
   methods: {
     /**
-     * Hàm di chuyển vị trí của form theo con trỏ chuột.
-     * @author: nttue (03/09/2023)
+     * Hàm lấy chỉ sổ lớn nhất của mã từ backend;
+     * @author: nttue (20/08/2023)
      */
-    handleMoveForm(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const startX = event.pageX;
-      const startY = event.pageY;
-      const form = this.$refs.form;
-      const formRect = this.$refs.form.getBoundingClientRect();
-
-      const maxTop = Math.ceil(
-        ((window.innerHeight - formRect.height / 2) / window.innerHeight) * 100
-      );
-      const maxLeft = Math.ceil(
-        ((window.innerWidth - formRect.width / 2) / window.innerWidth) * 100
-      );
-      const minTop = Math.ceil(
-        ((0.5 * formRect.height) / window.innerHeight) * 100
-      );
-      const minLeft = Math.ceil(
-        ((0.5 * formRect.width) / window.innerWidth) * 100
-      );
-
-      const handleMouseMove = (event) => {
-        const diffX = event.pageX - startX;
-        const diffY = event.pageY - startY;
-
-        const percentY = Math.ceil(
-          ((formRect.top + diffY + formRect.height / 2) / window.innerHeight) *
-            100
-        );
-        const percentX = Math.ceil(
-          ((formRect.left + diffX + formRect.width / 2) / window.innerWidth) *
-            100
-        );
-
-        this.leftModal = Math.min(Math.max(percentX, minLeft), maxLeft);
-        this.topModal = Math.min(Math.max(percentY, minTop), maxTop);
-      };
-
-      const mouseUpHandler = () => {
-        form.removeEventListener("mousemove", handleMouseMove);
-        form.removeEventListener("mouseup", mouseUpHandler);
-      };
-      form.addEventListener("mousemove", handleMouseMove);
-      form.addEventListener("mouseup", mouseUpHandler);
+    async getNewMaterialCodeAsync() {
+      this.maxCode = await materialService.getNewCode();
     },
     /**
      * Hàm reset form trước khi đóng form.
@@ -727,47 +678,73 @@ export default {
     },
 
     /**
+     * Hàm mô tả đơn vị chuyển đổi.
+     * @param {String} code đơn vị chuyển đổi.
+     * @param {String} calculation Phép tính.
+     * @param {Double} conversionRate tỉ lệ chuyển đổi.
+     * @param {String} codeOfMaterialUnitCode đơn vị tính của nguyên vật liệu.
+     * @author: nttue (20/08/2023)
+     */
+    insertDescription(
+      code,
+      calculation,
+      conversionRate,
+      codeOfMaterialUnitCode
+    ) {
+      var description = "";
+      if (calculation === "*") {
+        description = `1 ${code} = ${convertNumberDecimalToString(
+          conversionRate
+        )} ${calculation} ${codeOfMaterialUnitCode}`;
+      } else {
+        description = `1 ${code} = 1 ${calculation} ${convertNumberDecimalToString(
+          conversionRate
+        )} ${codeOfMaterialUnitCode}`;
+      }
+      return description;
+    },
+
+    /**
      * Hàm lấy ra các đơn vị chuyển đổi theo ID của material.
      * @author: nttue (20/08/2023)
      */
     async getUnitConversion() {
-      this.isLoadingTable = true;
-      const res = await UnitConversionService.getListByMaterialId(
-        this.materialEdit.MaterialId
-      );
-      // Gán thêm trường Order để lấy số thứ tự của ĐVCĐ.
-      // Gán Edit mode mặc định là none => chưa làm gì.
-      this.unitRows = res.map((item, index) => {
-        if (item.UnitId && item.ConversionRate && item.Calculation) {
-          var code = this.findCodeById(item.UnitId, this.units);
-          var codeOfMaterialUnitCode = this.findCodeById(
-            this.materialEdit.UnitId,
-            this.units
-          );
-          if (item.Calculation === "*") {
-            item.Description = `1 ${code} = ${convertNumberDecimalToString(
-              item.ConversionRate
-            )} ${item.Calculation} ${codeOfMaterialUnitCode}`;
-          } else {
-            item.Description = `1 ${code} = 1 ${
-              item.Calculation
-            } ${convertNumberDecimalToString(
-              item.ConversionRate
-            )} ${codeOfMaterialUnitCode}`;
+      try {
+        this.isLoadingTable = true;
+        const res = await UnitConversionService.getListByMaterialId(
+          this.materialEdit.MaterialId
+        );
+        // Gán thêm trường Order để lấy số thứ tự của ĐVCĐ.
+        // Gán Edit mode mặc định là none => chưa làm gì.
+        this.unitRows = res.map((item, index) => {
+          if (item.UnitId && item.ConversionRate && item.Calculation) {
+            var code = this.findCodeById(item.UnitId, this.units);
+            var codeOfMaterialUnitCode = this.findCodeById(
+              this.materialEdit.UnitId,
+              this.units
+            );
+            item.Description = this.insertDescription(
+              code,
+              item.Calculation,
+              item.ConversionRate,
+              codeOfMaterialUnitCode
+            );
           }
-        }
-        return {
-          ...item,
-          Order: index + 1,
-          Mode: this.$MEnum.MODE.NONE,
-        };
-      });
+          return {
+            ...item,
+            Order: index + 1,
+            Mode: this.$MEnum.MODE.NONE,
+          };
+        });
 
-      // gán ĐVCĐ ban đầu.
-      this.unitConversionsAtFirst = JSON.parse(JSON.stringify(this.unitRows));
-      // gán ĐVCĐ trước.
-      this.prevUnitConversions = JSON.parse(JSON.stringify(this.unitRows));
-      this.isLoadingTable = false;
+        // gán ĐVCĐ ban đầu.
+        this.unitConversionsAtFirst = JSON.parse(JSON.stringify(this.unitRows));
+        // gán ĐVCĐ trước.
+        this.prevUnitConversions = JSON.parse(JSON.stringify(this.unitRows));
+        this.isLoadingTable = false;
+      } catch (e) {
+        console.log(e);
+      }
     },
 
     // MARK: Phần mở sub form: unit, stock và materialgroup.
@@ -776,6 +753,9 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleOpenFormUnit() {
+      if (this.cellAddUnit < 0) {
+        this.inputName = "UnitId";
+      }
       this.handleOpenSubForm(unitService, UnitFormInput, "Unit");
     },
 
@@ -784,6 +764,7 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleOpenFormStock() {
+      this.inputName = "StockId";
       this.handleOpenSubForm(stockService, StockFormInput, "Stock");
     },
 
@@ -792,6 +773,7 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleOpenMaterialGroupStock() {
+      this.inputName = "MaterialGroupId";
       this.handleOpenSubForm(
         materialGroupService,
         MaterialGroupFormInput,
@@ -814,12 +796,21 @@ export default {
       // gán tên form.
       this.objectForm.formName = formName;
     },
+
     /**
      * Hàm thực hiện sự kiện đóng subform.
      * @author: nttue (20/08/2023)
      */
     handleCloseSubForm() {
       this.showSubForm = false;
+      if (this.cellAddUnit > -1) {
+        this.handleEditCellUnit(this.cellAddUnit, 1);
+      } else {
+        this.$refs[this.inputName].focus();
+      }
+
+      this.cellAddUnit = -1;
+      this.inputName = "";
     },
     /**
      * Hàm thực hiện sự kiện đóng subform và thêm bản ghi mới vào danh sách.
@@ -893,6 +884,7 @@ export default {
      */
     hanleClickCancel() {
       this.showDialog = false;
+      this.$refs[this.refsList[0]].focus();
     },
 
     /**
@@ -905,70 +897,147 @@ export default {
      * Modified at: 28/6/2023
      */
     async handleSaveMaterial(mode) {
-      // Thực hiện validate Material trước đơn vị chuyển đổi.
-      if (this.validateData()) {
-        // Nếu validate trả về true => có lỗi => commit 1 dialog để cảnh báo người dùng.
-        this.$store.commit("dialog/setErrorMessage", {
-          message: this.$refs[this.refsList[this.firstError]].error,
-          handleClose: this.handleFocusInputError,
-        });
-      }
-      // Thực hiện validate đơn vị chuyển dổi.
-      else if (this.validateUnitConversion() !== this.$MEnum.maxIndex) {
-        let rowError = this.validateUnitConversion();
-        this.$store.commit("dialog/setErrorMessage", {
-          message: this.$MResources.unitConversionIsEmpty,
-          handleClose: () => {
-            this.handleEditCellUnit(rowError, 1);
-          },
-        });
-      } else {
-        // Tạo 1 đối tượng gửi lên backend để update.
-        const materialInput = {
-          MaterialCreateDto: {
-            ...this.materialEdit,
-            UnFollowing: this.materialEdit.UnFollowing
-              ? this.$MEnum.YES_OR_NO.YES
-              : this.$MEnum.YES_OR_NO.NO,
-          },
-          UnitConversionCreateDtos: this.unitRows,
-        };
-        // Nếu chế độ form đang là thêm hoặc nhân bản thì gọi api post.
-        if (
-          this.formMode === this.$MEnum.formMode.add ||
-          this.formMode === this.$MEnum.formMode.replication
-        ) {
-          await materialService.post(materialInput);
-          this.$store.dispatch("showToast", {
-            label: this.$MResources.ToastMessage.MaterialCreate,
-          });
-          this.$emit("onReload");
-        } else if (this.formMode === this.$MEnum.formMode.update) {
-          // Nếu sử dụng hàm isEdited kiểm tra nguyên vật liệu đầu vào với nguyên vật liệu đã sửa đổi.
-          // Nếu true => call api để udpate.
-          if (this.isEdited()) {
-            await materialService.update(
-              this.materialEdit.MaterialId,
-              materialInput
-            );
+      // Kiểm tra và validate dữ liệu về Material.
+      const materialValidationError = this.validateData();
 
-            this.$emit("onReload");
-          }
-          // Ngược lại thì không phải call api.
-          this.$store.dispatch("showToast", {
-            label: this.$MResources.ToastMessage.MaterialUpdate,
+      if (materialValidationError) {
+        // Nếu có lỗi trong dữ liệu Material, hiển thị thông báo lỗi.
+        this.showErrorMessage(
+          this.$refs[this.refsList[this.firstError]].error,
+          this.handleFocusInputError
+        );
+      } else {
+        // Kiểm tra và validate đơn vị chuyển đổi.
+        const { indexUnitIdError, indexConversionRateError } =
+          this.validateUnitConversion();
+        if (indexUnitIdError !== this.$MEnum.maxIndex) {
+          // Nếu có lỗi về đơn vị chuyển đổi, hiển thị thông báo lỗi và điều hướng đến đơn vị đó.
+          this.showErrorMessage(this.$MResources.unitConversionIsEmpty, () => {
+            this.handleEditCellUnit(indexUnitIdError, 1);
           });
-        }
-        // gán lại chỉ số firstError = maxIndex.
-        this.firstError = this.$MEnum.maxIndex;
-        this.handleClearForm();
-        if (mode === this.$MEnum.SUBMIT_MODE.ADD) {
-          this.closeForm();
+        } else if (indexConversionRateError !== this.$MEnum.maxIndex) {
+          this.showErrorMessage(
+            this.$MResources.ConversionRateGreatherThanZero,
+            () => {
+              this.handleEditCellUnit(indexConversionRateError, 2);
+            }
+          );
         } else {
-          this.startingMaterial = {};
-          this.materialEdit = {};
+          // Tạo đối tượng dữ liệu để gửi lên backend để cập nhật hoặc thêm mới.
+          const materialInput = {
+            MaterialCreateDto: {
+              ...this.materialEdit,
+              UnFollowing: this.materialEdit.UnFollowing
+                ? this.$MEnum.YES_OR_NO.YES
+                : this.$MEnum.YES_OR_NO.NO,
+            },
+            UnitConversionCreateDtos: this.unitRows,
+          };
+
+          if (
+            this.formMode === this.$MEnum.formMode.add ||
+            this.formMode === this.$MEnum.formMode.replication
+          ) {
+            // Gọi API POST để thêm mới nguyên vật liệu.
+            await this.handlePostMaterial(materialInput, mode);
+          } else if (this.formMode === this.$MEnum.formMode.update) {
+            // Kiểm tra xem nguyên vật liệu đã được chỉnh sửa chưa.
+            if (this.isEdited()) {
+              // Nếu đã chỉnh sửa, gọi API để cập nhật.
+              await this.handleUpdateMaterial(materialInput, mode);
+            } else {
+              // Nếu không có sự thay đổi, kiểm tra chế độ thực hiện (Thêm mới hoặc Cập nhật) và thực hiện tương ứng.
+              this.handleNonEditedMaterial(mode);
+            }
+          }
+
+          // Đặt chỉ số firstError về maxIndex và làm sạch form.
+          this.firstError = this.$MEnum.maxIndex;
+          this.handleClearForm();
         }
       }
+    },
+
+    /**
+     * Hàm hiển thị thông báo lỗi.
+     * @param {String} message Thông báo lỗi.
+     * @param {Function} handleClose Hàm chạy sau khi đóng thông báo lỗi
+     * @author: nttue (20/08/2023)
+     */
+    showErrorMessage(message, handleClose) {
+      this.$store.commit("dialog/setErrorMessage", {
+        message,
+        handleClose,
+      });
+    },
+
+    /**
+     * Hàm gọi API POST nguyên vật liệu.
+     * @param {Object} materialInput - Đầu vào của api thêm mới NVL.
+     * @param {Number} mode chế độ form.
+     * @author: nttue (20/08/2023)
+     */
+    async handlePostMaterial(materialInput, mode) {
+      const response = await materialService.post(materialInput);
+
+      if (!response.errorCode) {
+        this.handleMaterialUpdateSuccess(mode);
+      }
+    },
+
+    /**
+     * Hàm gọi API UPDATE nguyên vật liệu.
+     * @param {Object} materialInput - Đầu vào của api cập nhật NVL.
+     * @param {Number} mode chế độ form.
+     * @author: nttue (20/08/2023)
+     */
+    async handleUpdateMaterial(materialInput, mode) {
+      const response = await materialService.update(
+        this.materialEdit.MaterialId,
+        materialInput
+      );
+
+      if (!response.errorCode) {
+        this.handleMaterialUpdateSuccess(mode);
+      }
+    },
+
+    /**
+     * Hàm xử lý sau khi cập nhật nguyên vật liệu thành công.
+     * @param {Number} mode chế độ form.
+     * @author: nttue (20/08/2023)
+     */
+    handleMaterialUpdateSuccess(mode) {
+      this.$emit("onReload");
+      this.$store.dispatch("showToast", {
+        label: this.$MResources.ToastMessage["Material"].update,
+      });
+      this.handleNonEditedMaterial(mode);
+    },
+
+    /**
+     * Hàm xử lý khi không có sự thay đổi trong nguyên vật liệu.
+     * @param {Number} mode chế độ form.
+     * @author: nttue (20/08/2023)
+     */
+    handleNonEditedMaterial(mode) {
+      if (mode === this.$MEnum.SUBMIT_MODE.ADD) {
+        this.closeForm();
+      } else {
+        this.handleResetDataForm();
+      }
+    },
+
+    /**
+     * Hàm reset dữ liệu trong form.
+     * @author: nttue (20/08/2023)
+     */
+    handleResetDataForm() {
+      this.startingMaterial = {};
+      this.materialEdit = {};
+      this.unitConversionsAtFirst = [];
+      this.unitRows = [];
+      this.prevUnitConversions = [];
     },
 
     /**
@@ -979,8 +1048,9 @@ export default {
      */
     validateUnitConversion() {
       // gán chỉ sổ của ô bị lỗi là max index.
-      var isError = this.$MEnum.maxIndex;
-      console.log(this.unitRows);
+      var indexUnitIdError = this.$MEnum.maxIndex;
+      var indexConversionRateError = this.$MEnum.maxIndex;
+
       for (let i = 0; i < this.unitRows.length; i++) {
         const unitRow = this.unitRows[i];
         const unitConversion = this.unitConversionsAtFirst.find(
@@ -990,8 +1060,13 @@ export default {
 
         // Kiểm tra nếu unitRow.UnitId là rỗng
         if (!unitRow.UnitId) {
-          isError = Math.min(isError, i);
+          indexUnitIdError = Math.min(indexUnitIdError, i);
         }
+        // Kiểm tra nếu tỉ lệ chuyển đổi > 0
+        if (unitRow.ConversionRate === 0) {
+          indexConversionRateError = Math.min(indexConversionRateError, i);
+        }
+
         // console.log(unitRow, unitConversion);
 
         // Kiểm tra nếu có sự khác biệt giữa unitRow và unitConversion và unitRow.Mode là NONE
@@ -1003,8 +1078,8 @@ export default {
           unitRow.Mode = this.$MEnum.MODE.EDIT;
         }
       }
-      // Trả về giá trị isError
-      return isError;
+      // Trả về giá trị indexUnitIdError
+      return { indexUnitIdError, indexConversionRateError };
     },
 
     /**
@@ -1100,7 +1175,9 @@ export default {
      * @author: nttue (20/08/2023)
      */
     closeForm() {
-      this.$emit("onClose");
+      if (!this.showSubForm) {
+        this.$emit("onClose");
+      }
     },
 
     /**
@@ -1117,11 +1194,13 @@ export default {
      * @author: nttue (20/08/2023)
      */
     onExit() {
-      this.isEdited()
-        ? this.openDialog({
-            label: this.$MResources.DataChanged,
-          })
-        : this.closeForm();
+      if (!this.showSubForm) {
+        this.isEdited()
+          ? this.openDialog({
+              label: this.$MResources.DataChanged,
+            })
+          : this.closeForm();
+      }
     },
 
     /**
@@ -1234,10 +1313,33 @@ export default {
         ...this.unitRows,
       };
 
-      console.log(this.unitConversionsAtFirst, this.unitRows);
-
       // So sánh hai đối tượng dưới dạng JSON để xác định sự thay đổi.
       return !areObjectsEqual(startingMaterialInput, materialInputAfter);
+    },
+
+    /**
+     * Hàm loại bỏ tất cả các ký tự không phải số ở đầu chuỗi và trả về phần còn lại.
+     * @param {string} value - Chuỗi đầu vào.
+     * @returns {string} - Phần của chuỗi có các ký tự số ở đầu, hoặc chuỗi rỗng nếu không có số.
+     * @author: nttue (20/08/2023)
+     */
+    removeNonNumericPrefix(value) {
+      // Regex để kiểm tra xem ký tự có phải là số không
+      var regex = /^[0-9]+/;
+      // Biến lưu vị trí của ký tự đầu tiên không phải số (không tìm thấy ban đầu)
+      var indexStartNumber = -1;
+
+      // Duyệt chuỗi từ cuối về đầu
+      for (let i = value.length - 1; i >= 0; i--) {
+        // Nếu ký tự hiện tại không phải số, cập nhật vị trí của ký tự đầu tiên không phải số
+        if (!regex.test(value[i])) {
+          indexStartNumber = i + 1;
+          break;
+        }
+      }
+
+      // Trả về phần của chuỗi có các ký tự số ở đầu, hoặc chuỗi rỗng nếu không có số.
+      return indexStartNumber > -1 ? value.slice(indexStartNumber) : "";
     },
   },
 
@@ -1250,7 +1352,15 @@ export default {
     "materialEdit.MaterialName": async function (newValue) {
       try {
         if (newValue && newValue.trim()) {
-          const newMaterialCode = await materialService.getNewCode(newValue);
+          var newMaterialCode = "";
+
+          if (this.formMode === this.$MEnum.formMode.update) {
+            newMaterialCode =
+              createPrefixCode(newValue) +
+              this.removeNonNumericPrefix(this.startingMaterial.MaterialCode);
+          } else {
+            newMaterialCode = createPrefixCode(newValue) + this.maxCode;
+          }
           this.materialEdit.MaterialCode = newMaterialCode;
         } else {
           this.materialEdit.MaterialCode = "";
@@ -1265,26 +1375,35 @@ export default {
      * @param {String} newValue đơn vị chuyển đổi
      * @author: nttue (20/08/2023)
      */
-    "materialEdit.UnitId": function (newValue) {
+    "materialEdit.UnitId": function (newValue, oldValue) {
       try {
         var newUnit = this.units.find((item) => item.id === newValue)?.name;
-
+        this.unitRows.forEach((item) => {
+          // Kiểm tra nếu đơn vị chuyển đổi trùng với đơn vị tính của vật liệu.
+          if (
+            item.UnitId === this.materialEdit.UnitId &&
+            item.Mode != this.$MEnum.MODE.DELETE
+          ) {
+            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
+            this.$store.commit("dialog/setErrorMessage", {
+              message: this.$MResources.ucIsDuplicatedWithUnitCode,
+              handleClose: () => {
+                this.$refs["UnitId"].focus();
+              },
+            });
+            // Đặt đơn vị chuyển đổi thành đơn vị trước đó.
+            this.materialEdit.UnitId = oldValue;
+          }
+        });
         if (newValue?.trim()) {
           this.unitRows.forEach((item) => {
             if (item.UnitId && item.ConversionRate && item.Calculation) {
-              if (item.Calculation === "*") {
-                item.Description = `1 ${
-                  item.UnitCode
-                } = ${convertNumberDecimalToString(item.ConversionRate)} ${
-                  item.Calculation
-                } ${newUnit}`;
-              } else {
-                item.Description = `1 ${code} = 1 ${
-                  item.Calculation
-                } ${convertNumberDecimalToString(
-                  item.ConversionRate
-                )} ${newUnit}`;
-              }
+              item.Description = this.insertDescription(
+                item.UnitCode,
+                item.Calculation,
+                item.ConversionRate,
+                newUnit
+              );
             }
           });
         }
@@ -1301,11 +1420,17 @@ export default {
     unitRows: {
       // Xử lý khi có thay đổi trong mảng unitRows.
       handler(newUnitConversions) {
-        newUnitConversions.forEach((item, index) => {
+        const newUC = newUnitConversions.filter(
+          (item) => item.Mode !== this.$MEnum.MODE.DELETE
+        );
+        newUC.forEach((item, index) => {
           const currentRowIndex = index; // Lưu index vào biến tạm
 
           // Kiểm tra nếu đơn vị chuyển đổi trùng với đơn vị tính của vật liệu.
-          if (item.UnitId === this.materialEdit.UnitId) {
+          if (
+            item.UnitId === this.materialEdit.UnitId &&
+            item.Mode !== this.$MEnum.MODE.DELETE
+          ) {
             // Đặt đơn vị chuyển đổi thành đơn vị trước đó.
             item.UnitId = this.prevUnitConversions[index].UnitId;
 
@@ -1324,7 +1449,7 @@ export default {
 
             // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
             this.$store.commit("dialog/setErrorMessage", {
-              message: this.$MResources.UnitConsersionGreaterThanZero,
+              message: this.$MResources.ConversionRateGreatherThanZero,
               handleClose: () => {
                 this.handleEditCellUnit(currentRowIndex, 2);
               },
@@ -1339,17 +1464,12 @@ export default {
               this.materialEdit.UnitId,
               this.units
             );
-            if (item.Calculation === "*") {
-              description = `1 ${code} = ${convertNumberDecimalToString(
-                item.ConversionRate
-              )} ${item.Calculation} ${codeOfMaterialUnitCode}`;
-            } else {
-              description = `1 ${code} = 1 ${
-                item.Calculation
-              } ${convertNumberDecimalToString(
-                item.ConversionRate
-              )} ${codeOfMaterialUnitCode}`;
-            }
+            description = this.insertDescription(
+              code,
+              item.Calculation,
+              item.ConversionRate,
+              codeOfMaterialUnitCode
+            );
             this.unitRows[currentRowIndex].Description = description;
           } else {
             this.unitRows[currentRowIndex].Description = "";
@@ -1365,17 +1485,11 @@ export default {
         });
 
         // Kiểm tra và xử lý nếu có đơn vị chuyển đổi trùng lặp.
-        for (let i = 0; i < newUnitConversions.length; i++) {
-          for (let j = i + 1; j < newUnitConversions.length; j++) {
-            if (
-              newUnitConversions[j].UnitId === newUnitConversions[i].UnitId &&
-              newUnitConversions[j].UnitId
-            ) {
-              var code = this.findCodeById(
-                newUnitConversions[j].UnitId,
-                this.units
-              );
-              newUnitConversions[j].UnitId = this.prevUnitConversions[j].UnitId;
+        for (let i = 0; i < newUC.length; i++) {
+          for (let j = i + 1; j < newUC.length; j++) {
+            if (newUC[j].UnitId === newUC[i].UnitId && newUC[j].UnitId) {
+              var code = this.findCodeById(newUC[j].UnitId, this.units);
+              newUC[j].UnitId = this.prevUnitConversions[j].UnitId;
 
               // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
               this.$store.commit("dialog/setErrorMessage", {
@@ -1389,7 +1503,7 @@ export default {
         }
 
         // Lưu lại các giá trị trước đó của đơn vị chuyển đổi.
-        this.prevUnitConversions = newUnitConversions.map((item) => {
+        this.prevUnitConversions = newUC.map((item) => {
           return {
             ...item,
           };

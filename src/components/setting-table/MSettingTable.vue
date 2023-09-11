@@ -32,7 +32,7 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="t-body">
+            <tbody class="t-body" v-click-outside="handleUnEdit">
               <tr
                 v-for="(item, index) in rows"
                 :key="index"
@@ -135,6 +135,7 @@ export default {
       editMode: -1,
     };
   },
+
   created() {
     const data = JSON.parse(localStorage.getItem("table-setting"));
     this.rows = data || materialColumns;
@@ -176,6 +177,14 @@ export default {
       if (sourceIndex >= 0 && targetIndex >= 0) {
         this.rows.splice(targetIndex, 0, this.rows.splice(sourceIndex, 1)[0]);
       }
+    },
+
+    /**
+     * Hàm thoát khỏi chế độ chỉnh sửa ở 1 form.
+     * @author: nttue (17/07/2023)
+     */
+    handleUnEdit() {
+      this.editMode = -1;
     },
 
     /**

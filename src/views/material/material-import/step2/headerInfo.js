@@ -7,6 +7,7 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 250,
+    minWidth: 250,
   },
   {
     field: "MaterialCode",
@@ -16,6 +17,7 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 150,
+    minWidth: 150,
   },
 
   {
@@ -26,6 +28,7 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 150,
+    minWidth: 150,
   },
 
   {
@@ -36,6 +39,7 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 150,
+    minWidth: 150,
   },
   {
     field: "MaterialGroupCode",
@@ -46,6 +50,7 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 150,
+    minWidth: 150,
   },
   {
     field: "UnitCode",
@@ -55,6 +60,7 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 150,
+    minWidth: 150,
   },
 
   {
@@ -65,5 +71,6 @@ export const headerInfo = [
     type: "string",
     textAlign: "left",
     width: 150,
+    minWidth: 150,
   },
 ];

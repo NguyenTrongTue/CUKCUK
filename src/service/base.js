@@ -1,5 +1,5 @@
 import request from "@/utils/request.js";
-import store from "@/store";
+import { tryCatchWrapper } from "@/utils/common";
 
 class BaseService {
   /**
@@ -21,38 +21,27 @@ class BaseService {
    * @author: nttue (20/07/2023)
    */
   async update(id, object) {
-    try {
-      store.dispatch("showLoading");
-      const res = await request.put(this.url + id, object);
-      store.dispatch("hideLoading");
-
-      return res;
-    } catch (e) {
-      store.dispatch("hideLoading");
-      console.log(e);
-    }
+    return tryCatchWrapper(async () => {
+      return request.put(this.url + id, object);
+    });
   }
   /**
    * @description hàm thêm mới dữ liệu
    * @author: nttue (20/07/2023)
    */
   async post(object) {
-    try {
-      store.dispatch("showLoading");
-      const res = await request.post(this.url, object);
-      store.dispatch("hideLoading");
-      return res;
-    } catch (e) {
-      store.dispatch("hideLoading");
-      console.log(e);
-    }
+    return tryCatchWrapper(async () => {
+      return request.post(this.url, object);
+    });
   }
   /**
    * @description hàm xóa dữ liệu
    * @author: nttue (20/07/2023)
    */
-  delete(id) {
-    return request.delete(this.url + id);
+  async delete(id) {
+    return tryCatchWrapper(async () => {
+      return request.delete(this.url + id);
+    });
   }
 
   /**

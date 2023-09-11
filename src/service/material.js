@@ -10,12 +10,8 @@ class materialService extends BaseService {
    * @returns Trả về mã nhân viên mới nhát
    * @author: nttue (20/07/2023)
    */
-  getNewCode(materialName) {
-    return request.get(this.url + "GetNewCode", {
-      params: {
-        materialName,
-      },
-    });
+  getNewCode() {
+    return request.get(this.url + "GetNewCode");
   }
 
   /**
@@ -28,16 +24,6 @@ class materialService extends BaseService {
         materialId,
       },
     });
-  }
-
-  /**
-   * Hàm lọc dữ liệu
-   * @param {Object} filterObject Đối tượng lọc dữ liệu
-   * @returns Các bản ghi theo kết quả lọc
-   * @author: nttue (20/07/2023)
-   */
-  filterObject(filterObject) {
-    return request.post(this.url + "FilterMaterial", filterObject);
   }
 }
 

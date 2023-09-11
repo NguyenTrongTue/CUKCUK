@@ -159,6 +159,14 @@ export default {
     pageNumber(newPageNumber) {
       this.$emit("choosePageNumber", newPageNumber);
     },
+    /**
+     * Thực hiện gán lại vị trí trang.
+     * @param {Number} newPageSize vị trí trang.
+     * @author: nttue (20/08/2023)
+     */
+    pageNumberProps(newPageNumber) {
+      this.pageNumber = newPageNumber;
+    },
   },
   methods: {
     /**

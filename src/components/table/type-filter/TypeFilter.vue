@@ -70,6 +70,9 @@ export default {
     dataList(newDataList) {
       this.data = newDataList;
     },
+    modelValue(newModelValue) {
+      this.dataValue = newModelValue;
+    },
   },
   methods: {
     /**
@@ -90,7 +93,11 @@ export default {
       this.showChooseCondition = !this.showChooseCondition;
 
       const filter = this.$refs.filterElement;
-      this.$emit("filter", this.index);
+      if (this.showChooseCondition && this.indexShow == this.index) {
+        this.$emit("filter", -1);
+      } else {
+        this.$emit("filter", this.index);
+      }
 
       this.top = filter.getBoundingClientRect().top + 26;
       this.left = filter.getBoundingClientRect().left;
@@ -114,6 +121,7 @@ export default {
       event.stopPropagation();
       this.dataValue = item.value;
       this.showChooseCondition = false;
+      this.$emit("filter", -1);
       this.$emit("update:modelValue", this.dataValue);
     },
 

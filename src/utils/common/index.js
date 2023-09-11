@@ -1,4 +1,5 @@
 import store from "@/store";
+import unidecode from "unidecode";
 
 /**
  * hàm xử lý sự kiện resize column của bảng
@@ -48,12 +49,12 @@ export function resizeColumn(event, resizer, table, col) {
     const mouseUpHandler = () => {
       removeBorderStyle(column);
       cells.forEach(removeBorderStyle);
-      table.removeEventListener("mousemove", mouseMoveHandler);
-      table.removeEventListener("mouseup", mouseUpHandler);
+      window.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mouseup", mouseUpHandler);
     };
 
-    table.addEventListener("mousemove", mouseMoveHandler);
-    table.addEventListener("mouseup", mouseUpHandler);
+    window.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mouseup", mouseUpHandler);
   } catch (e) {
     console.log(e);
   }
@@ -201,18 +202,17 @@ export function areObjectsEqual(v1, v2) {
  * Hàm try catch bao bọc hàm async function.
  * @param {Function} asyncFunc async function để thực thi.
  * @returns Trả về kết quả nhận được.
+ * @author: nttue (20/07/2023)
  */
 export async function tryCatchWrapper(asyncFunc) {
   try {
     store.dispatch("showLoading");
     const response = await asyncFunc();
-
     store.dispatch("hideLoading");
     return response;
   } catch (e) {
     store.dispatch("hideLoading");
     console.log(e);
-    throw e;
   }
 }
 
@@ -220,10 +220,42 @@ export async function tryCatchWrapper(asyncFunc) {
  * Hàm tạo dữ liệu blob từ dữ liệu trả về của api t
  * @param {DataTransfer} response dữ liệu file trả về.
  * @returns Trả về dữ liệu dưới dạng blob.
+ * @author: nttue (20/07/2023)
  */
 export async function createBlobFromResponse(response) {
   const blob = new Blob([response.data], {
     type: response.headers["content-type"],
   });
   return blob;
+}
+/**
+ * Hàm kiểm tra xem 1 từ có chứa tất cả các ký tự số hay không.
+ * @param {String} string Chuỗi đầu vào
+ * @returns Trả về kết quả kiểm tra
+ * @author: nttue (20/07/2023)
+ */
+function checkIsNumber(string) {
+  return /^[0-9]+$/.test(string);
+}
+
+/**
+ * Hàm tạo prefix cho code.
+ * @param {String} name - Chuỗi đầu vào.
+ * @returns Trả về định dạng.
+ * @author: nttue (20/07/2023)
+ */
+export function createPrefixCode(name) {
+  const words = name.split(" ");
+
+  const result = words
+    .filter((word) => !checkIsNumber(word))
+    .map((word) => {
+      const firstChar = word.charAt(0);
+      const cleanedFirstChar = unidecode(firstChar);
+
+      return cleanedFirstChar.toUpperCase();
+    })
+    .join("");
+
+  return result;
 }

@@ -1,5 +1,6 @@
 <template>
   <button
+    ref="button"
     class="button"
     :class="typeButton"
     :disabled="disabled"
@@ -8,7 +9,13 @@
     <span class="button-label">{{ label }}</span>
     <img :src="img" v-if="img" />
   </button>
-  <button class="button" :class="typeButton" :disabled="disabled" v-else>
+  <button
+    ref="button"
+    class="button"
+    :class="typeButton"
+    :disabled="disabled"
+    v-else
+  >
     <img :src="img" v-if="img" />
     <div v-else-if="icon" :class="icon"></div>
     <span class="button-label">{{ label }}</span>
@@ -60,6 +67,15 @@ export default {
     return {
       disabled: this.disabledProps,
     };
+  },
+  methods: {
+    /**
+     * Hàm xử lý sự kiện focus của button
+     * @author: nttue (06/09/2023)
+     */
+    focus() {
+      this.$refs.button.focus();
+    },
   },
   watch: {
     /**
