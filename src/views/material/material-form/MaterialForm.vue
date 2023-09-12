@@ -60,7 +60,7 @@
               tabIndex="4"
               type="table"
               :data="materialgroups"
-              :columnsTable="columnsStock"
+              :columnsTable="columnsCombobox"
               @onAddItem="handleOpenMaterialGroupStock"
               :showingComboboxProp="showingCombobox"
               @editShowCombobox="editShowCombobox"
@@ -94,7 +94,7 @@
               tabIndex="6"
               type="table"
               :data="stocks"
-              :columnsTable="columnsStock"
+              :columnsTable="columnsCombobox"
               @onAddItem="handleOpenFormStock"
               :showingComboboxProp="showingCombobox"
               @editShowCombobox="editShowCombobox"
@@ -139,7 +139,7 @@
             </div>
           </div>
           <minput
-            :label="'Mô tả'"
+            label="Ghi chú"
             typeInput="textarea"
             name="Description"
             v-model="materialEdit.Description"
@@ -378,11 +378,13 @@ import {
   StockFormInput,
   MaterialGroupFormInput,
 } from "@/resource/dataform.js";
+
 import materialService from "@/service/material.js";
 import unitService from "@/service/unit.js";
 import stockService from "@/service/stock.js";
 import materialGroupService from "@/service/materialGroup.js";
 import UnitConversionService from "@/service/UnitConversion.js";
+
 import validateFormMixin from "@/mixins/validateFormMixin.vue";
 import handleKeyDownFormMixin from "@/mixins/handleKeyDownFormMixin.vue";
 
@@ -392,6 +394,13 @@ import {
   areObjectsEqual,
   createPrefixCode,
 } from "@/utils/common";
+import {
+  datetime as datetimeResource,
+  categories as categoriesResource,
+  operator as operatorResource,
+  columnsCombobox as columnsComboboxResource,
+  unitRowTemplate as unitRowTemplateResource,
+} from "@/views/material/material-form/form-resources.js";
 
 export default {
   emits: ["onClose", "onReload"],
@@ -432,17 +441,21 @@ export default {
        * Danh sách đơn vị chuyển đổi trước khi update.
        */
       prevUnitConversions: [],
-
-      // Thuộc tính hiển thị loading ở table.
+      /**
+       * Thuộc tính hiển thị loading ở table.
+       */
       isLoading: false,
-
-      // Thuộc tính hiển thị loading ở table.
+      /**
+       * Thuộc tính hiển thị loading ở table.
+       */
       isLoadingTable: false,
-
-      // Thuộc tính hiển thị form thêm mới.
+      /**
+       * Thuộc tính hiển thị form thêm mới.
+       */
       showSubForm: false,
-
-      // Thuộc tính hiển thị dialog cảnh báo.
+      /**
+       * Thuộc tính hiển thị dialog cảnh báo.
+       */
       showDialog: false,
       /**
        * Chiều cao header của bảng.
@@ -452,11 +465,15 @@ export default {
        * Tên combobox đang show droplist.
        */
       showingCombobox: "",
-
       /**
        * Vị trị ô thêm mới đơn vị tính.
        */
       cellAddUnit: -1,
+
+      /**
+       * Chỉ số hàng đang được focus trong bảng đơn vị chuyển đổi.
+       */
+      rowFocused: -1,
 
       /**
        * Tên ô nhập liệu đang mở form thêm mới.
@@ -476,14 +493,7 @@ export default {
        * Đối tượng mẫu của unitconversion.
        * Khi thêm hàng thì add đối tượng này vào mảng unitRows.
        */
-      unitRowTemplate: {
-        Order: 1,
-        UnitId: "",
-        ConversionRate: 1.0,
-        Calculation: "*",
-        Description: "",
-        Mode: 1,
-      },
+      unitRowTemplate: unitRowTemplateResource,
       /**
        * Vị trí ô đang ở chế độ sửa trong bảng unitconversion.
        */
@@ -535,45 +545,19 @@ export default {
       /**
        * Tiêu đề cột trong combobox của stock.
        */
-      columnsStock: [
-        {
-          field: "code",
-          headerName: this.$MResources.CodeText,
-        },
-        {
-          field: "name",
-          headerName: this.$MResources.NameText,
-        },
-      ],
+      columnsCombobox: columnsComboboxResource,
       /**
        * Mảng chứa thông tin chuyển phần tính chất.
        */
-      categories: [
-        { id: this.$MResources.materials, name: this.$MResources.materials },
-        { id: this.$MResources.otherItem, name: this.$MResources.otherItem },
-        {
-          id: this.$MResources.bottledDrinks,
-          name: this.$MResources.bottledDrinks,
-        },
-      ],
+      categories: categoriesResource,
       /**
        * Toán tử trong phần phép tính đơn vị chuyển đổi.
        */
-      operator: [
-        { id: "*", name: "*", label: this.$MResources.Divide },
-        { id: "/", name: "/", label: this.$MResources.Substract },
-      ],
+      operator: operatorResource,
       /**
        * Danh sách loại thời gian: ngày, tháng, năm.
        */
-      datetime: [
-        {
-          id: this.$MResources.dayLabel,
-          name: this.$MResources.dayLabel,
-        },
-        { id: this.$MResources.monthLabel, name: this.$MResources.monthLabel },
-        { id: this.$MResources.yearLabel, name: this.$MResources.yearLabel },
-      ],
+      datetime: datetimeResource,
       /**
        * Chỉ số lớn nhất của code được trả về từ backend.
        */
@@ -590,14 +574,13 @@ export default {
   async mounted() {
     // Thực hiện focus vào ô input đầu tiên khi mở form lên.
     this.$refs[this.refsList[0]].focus();
-
+    // Thực hiện call api để lấy mã mới nhất từ be.
+    this.getNewMaterialCodeAsync();
     if (this.$refs.tableHeader) {
       this.tableHeaderHeight =
         this.$refs.tableHeader.getBoundingClientRect().height + 2;
     }
-    this.getNewMaterialCodeAsync();
-  },
-  async created() {
+
     // Lấy danh sách đơn vị đơn vị tính, kho, nhóm nguyên vật liệu.
     await this.fetchData(this.getUnits);
     await this.fetchData(this.getStocks);
@@ -612,36 +595,191 @@ export default {
     }
   },
 
-  methods: {
+  watch: {
     /**
-     * Hàm lấy chỉ sổ lớn nhất của mã từ backend;
+     * Hàm call api để lấy mã mới khi người dùng nhập tên NVL.
+     * @param {String} newValue tên NVL
      * @author: nttue (20/08/2023)
      */
-    async getNewMaterialCodeAsync() {
-      this.maxCode = await materialService.getNewCode();
-    },
-    /**
-     * Hàm reset form trước khi đóng form.
-     * @author: nttue (20/08/2023)
-     */
-    handleClearForm() {
-      this.unitRows = [];
-    },
-    /**
-     * Hàm hiển thị tên combobox đang hiển thị droplist.
-     * @author: nttue (20/08/2023)
-     */
-    editShowCombobox(comboboxName) {
-      this.showingCombobox = comboboxName;
-    },
-    /**
-     * Hàm focus vào ô input đầu tiên bị lỗi sau khi đóng dialog cảnh báo
-     * @author: nttue (20/08/2023)
-     */
-    handleFocusInputError() {
-      this.$refs[this.refsList[this.firstError]].focus();
+    "materialEdit.MaterialName": async function (newValue) {
+      try {
+        if (newValue && newValue.trim()) {
+          var newMaterialCode = "";
+
+          if (this.formMode === this.$MEnum.formMode.update) {
+            newMaterialCode =
+              createPrefixCode(newValue) +
+              this.removeNonNumericPrefix(this.startingMaterial.MaterialCode);
+          } else {
+            newMaterialCode = createPrefixCode(newValue) + this.maxCode;
+          }
+          this.materialEdit.MaterialCode = newMaterialCode;
+        } else {
+          this.materialEdit.MaterialCode = "";
+        }
+      } catch (e) {
+        console.log(e);
+      }
     },
 
+    /**
+     * Hàm thực hiện gán giá trị phần mổ trả khi người dùng điền đầy đủ thông tin phần đơn vị chuyển đổi.
+     * @param {String} newValue đơn vị chuyển đổi
+     * @author: nttue (20/08/2023)
+     */
+    "materialEdit.UnitId": function (newValue, oldValue) {
+      try {
+        var newUnit = this.units.find((item) => item.id === newValue)?.name;
+        this.unitRows.forEach((item) => {
+          // Kiểm tra nếu đơn vị chuyển đổi trùng với đơn vị tính của vật liệu.
+          if (
+            this.materialEdit.UnitId &&
+            item.UnitId === this.materialEdit.UnitId &&
+            item.Mode != this.$MEnum.MODE.DELETE
+          ) {
+            // Đặt đơn vị chuyển đổi thành đơn vị trước đó.
+            this.materialEdit.UnitId = oldValue;
+
+            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
+            this.$store.commit("dialog/setErrorMessage", {
+              message: this.$MResources.ucIsDuplicatedWithUnitCode,
+              handleClose: () => {
+                this.$refs["UnitId"].focus();
+              },
+            });
+          }
+        });
+        if (newValue?.trim()) {
+          this.unitRows.forEach((item) => {
+            if (item.UnitId && item.ConversionRate && item.Calculation) {
+              item.Description = this.insertDescription(
+                item.UnitCode,
+                item.Calculation,
+                item.ConversionRate,
+                newUnit
+              );
+            }
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    },
+
+    /**
+     * Hàm thực hiện validate trường hợp trùng đơn vị chuyển đổi và tính toán mô tả cho đơn vị chuyển đổi.
+     * @param {String} newValue - Đơn vị chuyển đổi mới.
+     * @author: nttue (20/08/2023)
+     */
+    unitRows: {
+      // Xử lý khi có thay đổi trong mảng unitRows.
+      handler(newUnitConversions) {
+        const newUC = newUnitConversions.filter(
+          (item) => item.Mode !== this.$MEnum.MODE.DELETE
+        );
+        newUC.forEach((item, index) => {
+          const currentRowIndex = index; // Lưu index vào biến tạm
+
+          // Kiểm tra nếu đơn vị chuyển đổi trùng với đơn vị tính của vật liệu.
+          if (
+            item.UnitId &&
+            item.UnitId === this.materialEdit.UnitId &&
+            item.Mode !== this.$MEnum.MODE.DELETE
+          ) {
+            // Đặt đơn vị chuyển đổi thành đơn vị trước đó.
+            item.UnitId = this.prevUnitConversions[index].UnitId;
+
+            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
+            this.$store.commit("dialog/setErrorMessage", {
+              message: this.$MResources.ucIsDuplicatedWithUnitCode,
+              handleClose: () => {
+                this.handleEditCellUnit(currentRowIndex, 1);
+              },
+            });
+          }
+
+          // Kiểm tra nếu tỷ lệ chuyển đổi bằng 0.
+          if (item.ConversionRate === 0) {
+            item.ConversionRate = 0;
+
+            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
+            this.$store.commit("dialog/setErrorMessage", {
+              message: this.$MResources.ConversionRateGreatherThanZero,
+              handleClose: () => {
+                this.handleEditCellUnit(currentRowIndex, 2);
+              },
+            });
+          }
+
+          // Tính toán mô tả cho đơn vị chuyển đổi.
+          if (
+            item.UnitId &&
+            item.ConversionRate &&
+            item.Calculation &&
+            this.materialEdit.UnitId
+          ) {
+            var description = "";
+            var code = this.findCodeById(item.UnitId, this.units);
+            var codeOfMaterialUnitCode = this.findCodeById(
+              this.materialEdit.UnitId,
+              this.units
+            );
+            description = this.insertDescription(
+              code,
+              item.Calculation,
+              item.ConversionRate,
+              codeOfMaterialUnitCode
+            );
+            this.unitRows[currentRowIndex].Description = description;
+          } else {
+            this.unitRows[currentRowIndex].Description = "";
+          }
+
+          // Cập nhật đơn vị chuyển đổi trong unitRows.
+          if (item.UnitId) {
+            var newUnit = this.units.find(
+              (itemUnit) => itemUnit.id === item.UnitId
+            );
+            this.unitRows[currentRowIndex].UnitId = newUnit.id;
+          }
+        });
+
+        // Kiểm tra và xử lý nếu có đơn vị chuyển đổi trùng lặp.
+        for (let i = 0; i < newUC.length; i++) {
+          for (let j = i + 1; j < newUC.length; j++) {
+            if (newUC[j].UnitId === newUC[i].UnitId && newUC[j].UnitId) {
+              var code = this.findCodeById(newUC[j].UnitId, this.units);
+              let lastCellError =
+                newUC[j].UnitId === this.prevUnitConversions[j].UnitId;
+
+              if (lastCellError) {
+                newUC[i].UnitId = this.prevUnitConversions[i].UnitId;
+              } else {
+                newUC[j].UnitId = this.prevUnitConversions[j].UnitId;
+              }
+
+              // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
+              this.$store.commit("dialog/setErrorMessage", {
+                message: `${this.$MResources.unitConversion} <<${code}>> ${this.$MResources.used}`,
+                handleClose: () => {
+                  this.handleEditCellUnit(lastCellError ? i : j, 1);
+                },
+              });
+            }
+          }
+        }
+
+        // Lưu lại các giá trị trước đó của đơn vị chuyển đổi.
+        this.prevUnitConversions = newUC.map((item) => {
+          return {
+            ...item,
+          };
+        });
+      },
+      deep: true, // Theo dõi thay đổi sâu trong mảng unitRows.
+    },
+  },
+  methods: {
     /**
      * Hàm chuyển đổi dữ liệu từ id sang text để hiển thị.
      *  @author: nttue (20/08/2023)
@@ -655,6 +793,7 @@ export default {
       return allowDecimal ? convertNumberDecimalToString(value) : value;
     },
 
+    //MARK: Hàm xử lý 1 số sự kiện của form.
     /**
      * Hàm thực hiện mở phần context khi người dùng nhấn chuột phải.
      * @param {Object} event đối tượng event khi click.
@@ -665,7 +804,6 @@ export default {
       event.preventDefault(); // Chặn sự kiện mặc định
       this.$refs.contextRef.show(event);
     },
-
     /**
      * Hàm bắt sự kiện khi đóng phần sửa 1 ô trong bảng đơn vị chuyển đổi.
      * @author: nttue (20/08/2023)
@@ -676,7 +814,6 @@ export default {
         column: -1,
       };
     },
-
     /**
      * Hàm mô tả đơn vị chuyển đổi.
      * @param {String} code đơn vị chuyển đổi.
@@ -703,7 +840,176 @@ export default {
       }
       return description;
     },
+    /**
+     * Hàm hiển thị tên combobox đang hiển thị droplist.
+     * @author: nttue (20/08/2023)
+     */
+    editShowCombobox(comboboxName) {
+      this.showingCombobox = comboboxName;
+    },
+    /**
+     * Hàm focus vào ô input đầu tiên bị lỗi sau khi đóng dialog cảnh báo
+     * @author: nttue (20/08/2023)
+     */
+    handleFocusInputError() {
+      this.$refs[this.refsList[this.firstError]].focus();
+    },
+    /**
+     * Xử lý sự kiện khi người dùng muốn chỉnh sửa ô trong bảng.
+     * @param {number} indexRow - Chỉ số dòng trong bảng.
+     * @param {number} indexColumn - Chỉ số cột trong bảng.
+     * @author: nttue (20/08/2023)
+     */
+    handleEditCellUnit(indexRow, indexColumn) {
+      // Ngăn chặn sự lan truyền của sự kiện để tránh xung đột.
+      event.stopPropagation();
 
+      this.rowFocused = indexRow;
+
+      // Lưu thông tin ô đang được chỉnh sửa (dòng và cột).
+      this.cellEdit = {
+        row: indexRow,
+        column: indexColumn,
+      };
+
+      // Tạo tên cho input dựa trên chỉ số dòng và cột.
+      const inputName = "input_" + indexRow + "_" + indexColumn;
+
+      // Sử dụng $nextTick để đảm bảo rằng các thay đổi trước đó đã được cập nhật.
+      this.$nextTick(() => {
+        // Tìm và kiểm tra tồn tại của input theo tên đã tạo.
+        if (this.$refs[inputName] && this.$refs[inputName][0]) {
+          // Tập trung vào input để người dùng có thể nhập liệu.
+          this.$refs[inputName][0].focus();
+        }
+      });
+    },
+
+    /**
+     * Hàm thực hiện thêm một hàng vào bảng đơn vị chuyển đổi.
+     * @author: nttue (20/08/2023)
+     */
+    addRow(event) {
+      event?.stopPropagation();
+
+      this.unitRows.push({
+        ...this.unitRowTemplate,
+        Order: this.unitRows.length + 1,
+      });
+
+      this.handleEditCellUnit(this.unitRows.length - 1, 1);
+    },
+    /**
+     * Hàm thực hiện xóa một hàng vào bảng đơn vị chuyển đổi.
+     * @author: nttue (20/08/2023)
+     */
+    removeRow() {
+      // Trường hợp tồn tại rowFocused thì xóa hàng đó.
+      if (this.rowFocused > -1 && this.rowFocused < this.unitRows.length) {
+        this.unitRows.splice(this.rowFocused, 1);
+      }
+      // Ngược lại thì xóa từ cuối hàng hoặc nếu đã có id thì chuyển editmode thành đã xóa.
+      else {
+        for (let i = this.unitRows.length - 1; i >= 0; i--) {
+          if (!this.unitRows[i].UnitConversionId) {
+            this.unitRows.pop();
+            break;
+          } else {
+            if (this.unitRows[i].Mode != this.$MEnum.MODE.DELETE) {
+              this.unitRows[i].Mode = this.$MEnum.MODE.DELETE;
+              break;
+            }
+          }
+        }
+      }
+    },
+
+    /**
+     * Hàm thực hiện gửi sự kiện đóng form.
+     * @author: nttue (20/08/2023)
+     */
+    closeForm() {
+      if (!this.showSubForm) {
+        this.$emit("onClose");
+      }
+    },
+
+    /**
+     * Hàm thực hiện mở dialog.
+     * @author: nttue (20/08/2023)
+     */
+    openDialog(content) {
+      this.showDialog = true;
+      this.dialogContent = content;
+    },
+
+    /**
+     * Hàm thực hiện xử lý sự kiện khi người dùng muốn thoát form.
+     * @author: nttue (20/08/2023)
+     */
+    onExit() {
+      if (!this.showSubForm) {
+        this.isEdited()
+          ? this.openDialog({
+              label: this.$MResources.DataChanged,
+            })
+          : this.closeForm();
+      }
+    },
+    /**
+     * Hàm hiển thị thông báo lỗi.
+     * @param {String} message Thông báo lỗi.
+     * @param {Function} handleClose Hàm chạy sau khi đóng thông báo lỗi
+     * @author: nttue (20/08/2023)
+     */
+    showErrorMessage(message, handleClose) {
+      this.$store.commit("dialog/setErrorMessage", {
+        message,
+        handleClose,
+      });
+    },
+    // MARK: Hàm lấy danh sách kho, đơn vị tính, nhóm nguyên vật liệu, đơn vị chuyển đổi.
+    /**
+     * Hàm thực hiện lấy đơn vị.
+     * @author: nttue (20/08/2023)
+     */
+    async getUnits() {
+      const data = await unitService.get();
+      this.units = data.map((item) => {
+        return {
+          id: item.UnitId,
+          name: item.UnitCode,
+        };
+      });
+    },
+    /**
+     * Hàm thực hiện danh sách kho ngầm định.
+     * @author: nttue (20/08/2023)
+     */
+    async getStocks() {
+      const data = await stockService.get();
+      this.stocks = data.map((item) => {
+        return {
+          id: item.StockId,
+          name: item.StockName,
+          code: item.StockCode,
+        };
+      });
+    },
+    /**
+     * Hàm thực hiện danh sách nhóm nguyên vật liệu.
+     * @author: nttue (20/08/2023)
+     */
+    async getMaterialGroups() {
+      const data = await materialGroupService.get();
+      this.materialgroups = data.map((item) => {
+        return {
+          id: item.MaterialGroupId,
+          code: item.MaterialGroupCode,
+          name: item.MaterialGroupName,
+        };
+      });
+    },
     /**
      * Hàm lấy ra các đơn vị chuyển đổi theo ID của material.
      * @author: nttue (20/08/2023)
@@ -746,7 +1052,13 @@ export default {
         console.log(e);
       }
     },
-
+    /**
+     * Hàm lấy chỉ sổ lớn nhất của mã từ backend;
+     * @author: nttue (20/08/2023)
+     */
+    async getNewMaterialCodeAsync() {
+      this.maxCode = await materialService.getNewCode();
+    },
     // MARK: Phần mở sub form: unit, stock và materialgroup.
     /**
      * Hàm thực hiện mở form unit.
@@ -859,6 +1171,7 @@ export default {
       }
     },
 
+    // MARK: Các hàm xử lý xử kiện dialog cảnh báo khi đóng form mà dữ liệu đã thay đổi.
     /**
      * Hàm xử lý sự kiện khi người dùng click vào button có ở dialog.
      * @author: nttue (20/08/2023)
@@ -887,6 +1200,7 @@ export default {
       this.$refs[this.refsList[0]].focus();
     },
 
+    // MARK: Các hàm xử lý sự kiện khi lưu form.
     /**
      * @description Hàm thực hiện kiểm tra xem các input có lỗi không
      * nếu không gửi sự kiện đóng form và thêm mới nhân viên
@@ -950,25 +1264,10 @@ export default {
               this.handleNonEditedMaterial(mode);
             }
           }
-
           // Đặt chỉ số firstError về maxIndex và làm sạch form.
           this.firstError = this.$MEnum.maxIndex;
-          this.handleClearForm();
         }
       }
-    },
-
-    /**
-     * Hàm hiển thị thông báo lỗi.
-     * @param {String} message Thông báo lỗi.
-     * @param {Function} handleClose Hàm chạy sau khi đóng thông báo lỗi
-     * @author: nttue (20/08/2023)
-     */
-    showErrorMessage(message, handleClose) {
-      this.$store.commit("dialog/setErrorMessage", {
-        message,
-        handleClose,
-      });
     },
 
     /**
@@ -1033,8 +1332,14 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleResetDataForm() {
-      this.startingMaterial = {};
-      this.materialEdit = {};
+      this.startingMaterial = {
+        ExpiryType: this.$MResources.dayLabel,
+        Category: this.$MResources.materials,
+      };
+      this.materialEdit = {
+        ExpiryType: this.$MResources.dayLabel,
+        Category: this.$MResources.materials,
+      };
       this.unitConversionsAtFirst = [];
       this.unitRows = [];
       this.prevUnitConversions = [];
@@ -1087,8 +1392,7 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleSaveForm() {
-      let mode = this.$MEnum.SUBMIT_MODE.ADD;
-      this.handleSaveMaterial(mode);
+      this.handleSaveMaterial(this.$MEnum.SUBMIT_MODE.ADD);
     },
 
     /**
@@ -1096,173 +1400,12 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleSaveAndAdd() {
-      let mode = this.$MEnum.SUBMIT_MODE.ADD_AND_CREATE;
-      this.handleSaveMaterial(mode);
+      this.handleSaveMaterial(this.$MEnum.SUBMIT_MODE.ADD_AND_CREATE);
     },
 
-    /**
-     * Xử lý sự kiện khi người dùng muốn chỉnh sửa ô trong bảng.
-     * @param {number} indexRow - Chỉ số dòng trong bảng.
-     * @param {number} indexColumn - Chỉ số cột trong bảng.
-     * @author: nttue (20/08/2023)
-     */
-    handleEditCellUnit(indexRow, indexColumn) {
-      // Ngăn chặn sự lan truyền của sự kiện để tránh xung đột.
-      event.stopPropagation();
-
-      // Lưu thông tin ô đang được chỉnh sửa (dòng và cột).
-      this.cellEdit = {
-        row: indexRow,
-        column: indexColumn,
-      };
-
-      // Tạo tên cho input dựa trên chỉ số dòng và cột.
-      const inputName = "input_" + indexRow + "_" + indexColumn;
-
-      // Sử dụng $nextTick để đảm bảo rằng các thay đổi trước đó đã được cập nhật.
-      this.$nextTick(() => {
-        // Tìm và kiểm tra tồn tại của input theo tên đã tạo.
-        if (this.$refs[inputName] && this.$refs[inputName][0]) {
-          // Tập trung vào input để người dùng có thể nhập liệu.
-          this.$refs[inputName][0].focus();
-        }
-      });
-    },
-
-    /**
-     * Hàm thực hiện thêm một hàng vào bảng đơn vị chuyển đổi.
-     * @author: nttue (20/08/2023)
-     */
-    addRow(event) {
-      event?.stopPropagation();
-
-      if (this.materialEdit.UnitId) {
-        this.unitRows.push({
-          ...this.unitRowTemplate,
-          Order: this.unitRows.length + 1,
-        });
-
-        this.handleEditCellUnit(this.unitRows.length - 1, 1);
-      } else {
-        this.$store.commit("dialog/setErrorMessage", {
-          message: this.$MResources.unitIsEmpty,
-          handleClose: () => {
-            this.$refs["UnitId"].focus();
-          },
-        });
-      }
-    },
-    /**
-     * Hàm thực hiện xóa một hàng vào bảng đơn vị chuyển đổi.
-     * @author: nttue (20/08/2023)
-     */
-    removeRow() {
-      for (let i = this.unitRows.length - 1; i >= 0; i--) {
-        if (!this.unitRows[i].UnitConversionId) {
-          this.unitRows.pop();
-          break;
-        } else {
-          if (this.unitRows[i].Mode != this.$MEnum.MODE.DELETE) {
-            this.unitRows[i].Mode = this.$MEnum.MODE.DELETE;
-            break;
-          }
-        }
-      }
-    },
-
-    /**
-     * Hàm thực hiện gửi sự kiện đóng form.
-     * @author: nttue (20/08/2023)
-     */
-    closeForm() {
-      if (!this.showSubForm) {
-        this.$emit("onClose");
-      }
-    },
-
-    /**
-     * Hàm thực hiện mở dialog.
-     * @author: nttue (20/08/2023)
-     */
-    openDialog(content) {
-      this.showDialog = true;
-      this.dialogContent = content;
-    },
-
-    /**
-     * Hàm thực hiện xử lý sự kiện khi người dùng muốn thoát form.
-     * @author: nttue (20/08/2023)
-     */
-    onExit() {
-      if (!this.showSubForm) {
-        this.isEdited()
-          ? this.openDialog({
-              label: this.$MResources.DataChanged,
-            })
-          : this.closeForm();
-      }
-    },
-
-    /**
-     * Hàm base để fetch dữ liệu.
-     * @author: nttue (20/08/2023)
-     */
-    async fetchData(getDataFunction) {
-      try {
-        this.isLoading = true;
-        getDataFunction();
-        this.isLoading = false;
-      } catch (e) {
-        console.log(e);
-      }
-    },
-
-    // MARK: Hàm lấy danh sách kho, đơn vị tính và nhóm nguyên vật liệu
-    /**
-     * Hàm thực hiện lấy đơn vị.
-     * @author: nttue (20/08/2023)
-     */
-    async getUnits() {
-      const data = await unitService.get();
-      this.units = data.map((item) => {
-        return {
-          id: item.UnitId,
-          name: item.UnitCode,
-        };
-      });
-    },
-
-    /**
-     * Hàm thực hiện danh sách kho ngầm định.
-     * @author: nttue (20/08/2023)
-     */
-    async getStocks() {
-      const data = await stockService.get();
-      this.stocks = data.map((item) => {
-        return {
-          id: item.StockId,
-          name: item.StockName,
-          code: item.StockCode,
-        };
-      });
-    },
-
-    /**
-     * Hàm thực hiện danh sách nhóm nguyên vật liệu.
-     * @author: nttue (20/08/2023)
-     */
-    async getMaterialGroups() {
-      const data = await materialGroupService.get();
-      this.materialgroups = data.map((item) => {
-        return {
-          id: item.MaterialGroupId,
-          code: item.MaterialGroupCode,
-          name: item.MaterialGroupName,
-        };
-      });
-    },
-    // ENDMARK
-
+    //MARK: Hàm thực hiện nhiệm vụ: tìm item trong mảng theo id
+    // Kiểm tra đối tượng đã thay đổi so với đối tượng ban đầu
+    // Xóa các ký tự không phải là số trong 1 từ: AB123 => 123.
     /**
      * Hàm thực hiện tìm mã theo id.
      * @author: nttue (20/08/2023)
@@ -1275,7 +1418,6 @@ export default {
         return "";
       }
     },
-
     /**
      * Hàm kiểm tra xem đối tượng material đầu vào với đầu ra khác nhau không.
      * @returns {boolean} - True nếu có sự thay đổi, ngược lại là False.
@@ -1316,7 +1458,6 @@ export default {
       // So sánh hai đối tượng dưới dạng JSON để xác định sự thay đổi.
       return !areObjectsEqual(startingMaterialInput, materialInputAfter);
     },
-
     /**
      * Hàm loại bỏ tất cả các ký tự không phải số ở đầu chuỗi và trả về phần còn lại.
      * @param {string} value - Chuỗi đầu vào.
@@ -1341,177 +1482,21 @@ export default {
       // Trả về phần của chuỗi có các ký tự số ở đầu, hoặc chuỗi rỗng nếu không có số.
       return indexStartNumber > -1 ? value.slice(indexStartNumber) : "";
     },
-  },
-
-  watch: {
     /**
-     * Hàm call api để lấy mã mới khi người dùng nhập tên NVL.
-     * @param {String} newValue tên NVL
+     * Hàm base để fetch dữ liệu.
      * @author: nttue (20/08/2023)
      */
-    "materialEdit.MaterialName": async function (newValue) {
+    async fetchData(getDataFunction) {
       try {
-        if (newValue && newValue.trim()) {
-          var newMaterialCode = "";
-
-          if (this.formMode === this.$MEnum.formMode.update) {
-            newMaterialCode =
-              createPrefixCode(newValue) +
-              this.removeNonNumericPrefix(this.startingMaterial.MaterialCode);
-          } else {
-            newMaterialCode = createPrefixCode(newValue) + this.maxCode;
-          }
-          this.materialEdit.MaterialCode = newMaterialCode;
-        } else {
-          this.materialEdit.MaterialCode = "";
-        }
+        this.isLoading = true;
+        getDataFunction();
+        this.isLoading = false;
       } catch (e) {
         console.log(e);
       }
     },
-
-    /**
-     * Hàm thực hiện gán giá trị phần mổ trả khi người dùng điền đầy đủ thông tin phần đơn vị chuyển đổi.
-     * @param {String} newValue đơn vị chuyển đổi
-     * @author: nttue (20/08/2023)
-     */
-    "materialEdit.UnitId": function (newValue, oldValue) {
-      try {
-        var newUnit = this.units.find((item) => item.id === newValue)?.name;
-        this.unitRows.forEach((item) => {
-          // Kiểm tra nếu đơn vị chuyển đổi trùng với đơn vị tính của vật liệu.
-          if (
-            item.UnitId === this.materialEdit.UnitId &&
-            item.Mode != this.$MEnum.MODE.DELETE
-          ) {
-            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
-            this.$store.commit("dialog/setErrorMessage", {
-              message: this.$MResources.ucIsDuplicatedWithUnitCode,
-              handleClose: () => {
-                this.$refs["UnitId"].focus();
-              },
-            });
-            // Đặt đơn vị chuyển đổi thành đơn vị trước đó.
-            this.materialEdit.UnitId = oldValue;
-          }
-        });
-        if (newValue?.trim()) {
-          this.unitRows.forEach((item) => {
-            if (item.UnitId && item.ConversionRate && item.Calculation) {
-              item.Description = this.insertDescription(
-                item.UnitCode,
-                item.Calculation,
-                item.ConversionRate,
-                newUnit
-              );
-            }
-          });
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    },
-
-    /**
-     * Hàm thực hiện validate trường hợp trùng đơn vị chuyển đổi và tính toán mô tả cho đơn vị chuyển đổi.
-     * @param {String} newValue - Đơn vị chuyển đổi mới.
-     * @author: nttue (20/08/2023)
-     */
-    unitRows: {
-      // Xử lý khi có thay đổi trong mảng unitRows.
-      handler(newUnitConversions) {
-        const newUC = newUnitConversions.filter(
-          (item) => item.Mode !== this.$MEnum.MODE.DELETE
-        );
-        newUC.forEach((item, index) => {
-          const currentRowIndex = index; // Lưu index vào biến tạm
-
-          // Kiểm tra nếu đơn vị chuyển đổi trùng với đơn vị tính của vật liệu.
-          if (
-            item.UnitId === this.materialEdit.UnitId &&
-            item.Mode !== this.$MEnum.MODE.DELETE
-          ) {
-            // Đặt đơn vị chuyển đổi thành đơn vị trước đó.
-            item.UnitId = this.prevUnitConversions[index].UnitId;
-
-            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
-            this.$store.commit("dialog/setErrorMessage", {
-              message: this.$MResources.ucIsDuplicatedWithUnitCode,
-              handleClose: () => {
-                this.handleEditCellUnit(currentRowIndex, 1);
-              },
-            });
-          }
-
-          // Kiểm tra nếu tỷ lệ chuyển đổi bằng 0.
-          if (item.ConversionRate === 0) {
-            item.ConversionRate = 0;
-
-            // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
-            this.$store.commit("dialog/setErrorMessage", {
-              message: this.$MResources.ConversionRateGreatherThanZero,
-              handleClose: () => {
-                this.handleEditCellUnit(currentRowIndex, 2);
-              },
-            });
-          }
-
-          // Tính toán mô tả cho đơn vị chuyển đổi.
-          if (item.UnitId && item.ConversionRate && item.Calculation) {
-            var description = "";
-            var code = this.findCodeById(item.UnitId, this.units);
-            var codeOfMaterialUnitCode = this.findCodeById(
-              this.materialEdit.UnitId,
-              this.units
-            );
-            description = this.insertDescription(
-              code,
-              item.Calculation,
-              item.ConversionRate,
-              codeOfMaterialUnitCode
-            );
-            this.unitRows[currentRowIndex].Description = description;
-          } else {
-            this.unitRows[currentRowIndex].Description = "";
-          }
-
-          // Cập nhật đơn vị chuyển đổi trong unitRows.
-          if (item.UnitId) {
-            var newUnit = this.units.find(
-              (itemUnit) => itemUnit.id === item.UnitId
-            );
-            this.unitRows[currentRowIndex].UnitId = newUnit.id;
-          }
-        });
-
-        // Kiểm tra và xử lý nếu có đơn vị chuyển đổi trùng lặp.
-        for (let i = 0; i < newUC.length; i++) {
-          for (let j = i + 1; j < newUC.length; j++) {
-            if (newUC[j].UnitId === newUC[i].UnitId && newUC[j].UnitId) {
-              var code = this.findCodeById(newUC[j].UnitId, this.units);
-              newUC[j].UnitId = this.prevUnitConversions[j].UnitId;
-
-              // Hiển thị thông báo lỗi và xử lý khi người dùng đóng thông báo.
-              this.$store.commit("dialog/setErrorMessage", {
-                message: `${this.$MResources.unitConversion} <<${code}>> ${this.$MResources.used}`,
-                handleClose: () => {
-                  this.handleEditCellUnit(j, 1);
-                },
-              });
-            }
-          }
-        }
-
-        // Lưu lại các giá trị trước đó của đơn vị chuyển đổi.
-        this.prevUnitConversions = newUC.map((item) => {
-          return {
-            ...item,
-          };
-        });
-      },
-      deep: true, // Theo dõi thay đổi sâu trong mảng unitRows.
-    },
   },
+
   computed: {
     /**
      * @return trả vể 1 mảng chứa tên của các ref trong form.

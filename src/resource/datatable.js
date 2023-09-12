@@ -133,9 +133,9 @@ const materialColumns = [
   {
     field: "Description",
     value: "",
-    headerName: "Mô tả",
-    dataColumnName: "Mô tả",
-    tooltip: "Mô tả",
+    headerName: "Ghi chú",
+    dataColumnName: "Ghi chú",
+    tooltip: "Ghi chú",
     pinned: false,
     isShow: true,
     typeFilter: "input",

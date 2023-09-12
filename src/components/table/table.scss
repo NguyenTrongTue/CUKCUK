@@ -98,6 +98,12 @@
       background-color: white;
       border-right: 1px solid #ccc;
     }
+    .data__invalid {
+      color: red;
+    }
+    .data__valid {
+      color: rgb(20, 156, 77);
+    }
   }
 
   tr {

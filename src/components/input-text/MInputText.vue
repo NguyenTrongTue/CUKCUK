@@ -33,6 +33,7 @@
       :placeholder="placeholderInput"
       :tabindex="tabIndex"
       :spellcheck="false"
+      autocomplete="off"
       @input="onInput"
       @focus="onFocus"
       @keydown="onlyAllowNumber"

@@ -1,6 +1,6 @@
 const state = () => ({
   collapse: false,
-  lang: JSON.parse(localStorage.getItem("language-code")) || "vi",
+  lang: "vi",
   table: [],
 });
 const getters = {

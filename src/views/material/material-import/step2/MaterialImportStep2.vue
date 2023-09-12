@@ -38,7 +38,7 @@
           </tr>
         </thead>
         <tbody class="t-body">
-          <tr v-for="(item, index) in rows" :key="index">
+          <tr v-for="(row, index) in rows" :key="index">
             <td
               v-for="(column, index) in columns"
               :key="index"
@@ -48,13 +48,24 @@
                 minWidth: column.width ? column.width + 'px' : null,
               }"
             >
+              <div
+                :class="
+                  column.field === 'ValidateDescription' &&
+                  (!row.IsValid ? 'data__invalid' : 'data__valid')
+                "
+                v-if="column.type === 'list'"
+                v-for="(validateItem, index) in row[column.field]"
+                :key="index"
+              >
+                <span>{{ validateItem }}</span>
+              </div>
               <mtooltip
-                :content="item[column.field]"
-                v-if="column.type !== 'checkbox'"
+                v-else
+                :content="row[column.field]"
                 :arrow="false"
                 :offset="[0, 0]"
               >
-                <span> {{ item[column.field] }}</span>
+                <span> {{ row[column.field] }}</span>
               </mtooltip>
             </td>
           </tr>
@@ -83,7 +94,6 @@ export default {
       type: String,
       required: true,
     },
-    
   },
   data() {
     return {
@@ -140,10 +150,10 @@ export default {
         this.rows = res.map((item) => {
           return {
             ...item,
-            Description:
-              (item.ValidateDescription.length > 0 &&
-                item.ValidateDescription.join(";")) ||
-              this.$MResources.Valid,
+            ValidateDescription:
+              item.ValidateDescription.length > 0
+                ? item.ValidateDescription
+                : ["Hợp lệ"],
           };
         });
         let valid = 0;

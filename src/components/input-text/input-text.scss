@@ -8,6 +8,9 @@
 .input-default.error {
   input {
     border-color: var(--error-color);
+    &:focus {
+      border-color: #0072bc;
+    }
   }
 }
 

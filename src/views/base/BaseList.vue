@@ -27,7 +27,6 @@
           :rows="data"
           :propsRowChoosed="rowChoosed"
           :loadingProp="isLoading"
-         
           @onChooseRow="handleChooseRow"
           @onUpdateRow="onUpdateRow"
           @filter="onFilter"
@@ -233,7 +232,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-@import "./base.scss";
-</style>

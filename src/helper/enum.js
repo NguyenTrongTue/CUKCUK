@@ -23,6 +23,10 @@ const MEnum = {
     ADD: 0,
     ADD_AND_CREATE: 1,
   },
+  ADDITION: {
+    AND: 0,
+    OR: 1,
+  },
 
   /**
    * Chế độ dialog.

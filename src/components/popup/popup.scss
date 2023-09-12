@@ -15,11 +15,15 @@
     font-size: 13px;
     color: white;
     line-height: 26px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
   }
 }
 
 .popup__header-icon {
   margin-right: 4px;
+  margin-bottom: 4px;
 }
 .dialog__container-content {
   min-height: 50px;

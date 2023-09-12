@@ -83,6 +83,7 @@ import materialService from "@/service/material.js";
 import MaterialExcelService from "@/service/materialexcel";
 import DeleteDialog from "@/views/base/DeleteDialog.vue";
 import baseListMixin from "@/mixins/baseListMixin.vue";
+import { createPrefixCode } from "@/utils/common";
 
 export default {
   mixins: [baseListMixin],
@@ -168,9 +169,9 @@ export default {
      * @author: nttue (20/08/2023)
      */
     async handleDuplicate() {
-      const newCode = await this.baseService.getNewCode(
-        this.rowChoosed.MaterialName
-      );
+      const newCode =
+        createPrefixCode(this.rowChoosed.MaterialName) +
+        (await this.baseService.getNewCode());
       this.materialEdit = {
         ...this.rowChoosed,
         ExpiryType: this.rowChoosed.ExpiryType || this.$MResources.dayLabel,

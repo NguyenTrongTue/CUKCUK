@@ -1,10 +1,10 @@
 export const headerInfo = [
   {
-    field: "Description",
+    field: "ValidateDescription",
     value: "",
     headerName: "Tình trạng",
     dataColumnName: "Tình trạng",
-    type: "string",
+    type: "list",
     textAlign: "left",
     width: 250,
     minWidth: 250,
@@ -72,5 +72,15 @@ export const headerInfo = [
     textAlign: "left",
     width: 150,
     minWidth: 150,
+  },
+  {
+    field: "Description",
+    value: "",
+    headerName: "Ghi chú",
+    dataColumnName: "Ghi chú",
+    type: "string",
+    textAlign: "left",
+    width: 250,
+    minWidth: 250,
   },
 ];

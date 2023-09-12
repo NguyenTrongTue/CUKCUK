@@ -16,15 +16,6 @@
   }
 }
 
-@keyframes modal {
-  from {
-    transform: translate(-50%, -80%);
-  }
-  to {
-    transform: translate(-50%, -50%);
-  }
-}
-
 @keyframes modal-right {
   from {
     transform: translateX(80%);

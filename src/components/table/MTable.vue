@@ -100,11 +100,11 @@
     <tbody class="t-body" v-if="!isLoading">
       <tr
         v-for="(item, index) in dataList"
-        @click="onChooseRow(item)"
-        @contextmenu="onChooseRow(item)"
+        :key="index"
         :class="{ choosed: item.id === rowChoosed?.id }"
         @dblclick="onUpdateRow(item)"
-        :key="index"
+        @click="onChooseRow(item)"
+        @contextmenu="onChooseRow(item)"
       >
         <td
           v-for="(column, index) in columns"
@@ -361,6 +361,7 @@ export default {
                 filterMode: column.typeFilterMode ?? 1,
                 fieldName: column.field,
                 fieldValue: column.value.toString(),
+                addition: this.$MEnum.ADDITION.AND,
               });
             }
           } else {
@@ -374,7 +375,6 @@ export default {
         });
 
         if (JSON.stringify(this.oldQueryFilter) !== JSON.stringify(filters)) {
-          
           this.$emit("filter", this.queryFilter);
           this.oldQueryFilter = filters;
         }

@@ -36,9 +36,7 @@
         @blur="onBlur"
         @keydown="onKeyDown($event)"
       />
-
       <div class="input-error">{{ error }}</div>
-
       <div class="combobox-icon">
         <div class="dropdown-icon flex-center" @click="showDropdown">
           <div class="icon-triangle-gray" :class="show && 'show'"></div>
@@ -47,7 +45,6 @@
           <div class="icon-sum"></div>
         </div>
       </div>
-
       <Teleport to="body">
         <div
           v-custom-outside="onClickOutside"
@@ -123,6 +120,7 @@
 export default {
   name: "MCombobox",
   emits: ["onAddItem", "update:modelValue", "editShowCombobox"],
+
   props: {
     // thuộc tính tùy chọn, nếu combobox là 1 table thì rows nó là dữ liệu truyền vào.
     data: {
@@ -227,8 +225,7 @@ export default {
     };
   },
   created() {
-    const selectedLabel = this.data.find((item) => item.id === this.modelValue);
-    this.inputValue = selectedLabel ? selectedLabel.name : "";
+    this.assignInputValue(this.modelValue);
   },
 
   watch: {
@@ -262,12 +259,7 @@ export default {
      */
     data(newRows) {
       this.dataList = [...newRows];
-
-      const selectedLabel = this.data.find(
-        (item) => item.id === this.modelValue
-      );
-
-      this.inputValue = selectedLabel ? selectedLabel.name : "";
+      this.assignInputValue(this.modelValue);
     },
 
     /**
@@ -294,10 +286,8 @@ export default {
      * @author: nttue (29/08/2023)
      */
     modelValue(newValue) {
-      const selectedLabel = this.data.find((item) => item.id === newValue);
-      this.inputValue = selectedLabel ? selectedLabel.name : "";
+      this.assignInputValue(newValue);
     },
-
     /**
      * Hàm gán lại giá trị của index hover khi người dùng gõ vào input.
      * @param {String} value giá trị của inputed
@@ -308,6 +298,24 @@ export default {
     },
   },
   methods: {
+    /**
+     * Hàm gán tên item cho inputValue
+     * @param {String} value giá trị id
+     * @author: nttue (29/08/2023)
+     */
+    assignInputValue(value) {
+      const selectedLabel = this.findNameById(value);
+      this.inputValue = selectedLabel ? selectedLabel.name : "";
+    },
+    /**
+     * Hàm tìm kiếm tên hiển thị theo id.
+     * @param {String} value giá trị id
+     * @author: nttue (29/08/2023)
+     */
+    findNameById(value) {
+      const selectedLabel = this.data.find((item) => item.id === value);
+      return selectedLabel;
+    },
     /**
      * Hàm gửi sự kiện thêm 1 đối tượng mới.
      * @param {Object} event
@@ -366,7 +374,7 @@ export default {
         if (!this.inputValue) {
           this.$emit("update:modelValue", "");
         } else {
-          const item = this.data.find((item) => item.id === this.modelValue);
+          const item = this.findNameById(this.modelValue);
           if (item) {
             this.inputValue = item.name;
           } else {
@@ -432,8 +440,8 @@ export default {
      */
     onClick(item) {
       this.inputValue = item.name;
-
       this.$emit("update:modelValue", item.id);
+
       this.hiddenComboboxData();
     },
 
