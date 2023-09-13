@@ -44,6 +44,8 @@ export default {
         this.buttonHelpFocused = true;
       } else if (focusedElement === this.$refs.UnFollowingRef?.$el) {
         this.checkboxUnfollowingFocused = true;
+      } else {
+        this.checkboxUnfollowingFocused = false;
       }
     },
     /**
@@ -61,7 +63,10 @@ export default {
         this.buttonHelpFocused = false;
       } else if (keyCode === this.$MEnum.KEYBOARD.ESC) {
         this.onExit();
-      } else if (keyCode === this.$MEnum.KEYBOARD.SPACE) {
+      } else if (
+        keyCode === this.$MEnum.KEYBOARD.SPACE &&
+        this.checkboxUnfollowingFocused
+      ) {
         this.materialEdit.UnFollowing = !this.materialEdit.UnFollowing;
       } else if (
         event.ctrlKey &&

@@ -17,7 +17,7 @@
               >
             </div>
             <div class="menu-item__step">
-              <span class="import__title"
+              <span class="import__title" G
                 >2. {{ this.$MResources.CheckData }}</span
               >
             </div>
@@ -163,7 +163,6 @@ export default {
     file: {
       handler() {
         this.changedFile = true;
-        console.log(this.changedFile);
       },
       deep: true,
     },

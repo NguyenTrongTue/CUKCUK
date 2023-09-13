@@ -406,11 +406,19 @@ import {
 } from "@/views/material/material-form/form-resources.js";
 
 export default {
+  /**
+   * Gửi sự kiện đóng form và tải lại trang.
+   */
   emits: ["onClose", "onReload"],
+  /**
+   * ValidateFormMixn dùng để định nghĩa kịch bản validate dùng chung cho các form.
+   * handleKeyDownFormMixin xử lý các sự kiện phím tắt cho form.
+   */
   mixins: [validateFormMixin, handleKeyDownFormMixin],
   components: {
     MBaseForm,
   },
+
   props: {
     /**
      * Prop nguyên vật liệu được truyền vào từ component MaterialList
@@ -571,6 +579,9 @@ export default {
       maxCode: -1,
     };
   },
+  /**
+   * Nếu nhận được lỗi trùng mã trả về từ backend thì focus vào ô input mã.
+   */
   beforeMount() {
     this.$emitter.on("duplicateCode", () => {
       this.$nextTick(() => {
@@ -578,6 +589,9 @@ export default {
       });
     });
   },
+  /**
+   * Thực hiện 1 số nhiệm vụ khi mở form được mô tả ở dưới.
+   */
   async mounted() {
     // Thực hiện focus vào ô input đầu tiên khi mở form lên.
     this.$refs[this.refsList[0]].focus();
@@ -740,14 +754,6 @@ export default {
             this.unitRows[currentRowIndex].Description = description;
           } else {
             this.unitRows[currentRowIndex].Description = "";
-          }
-
-          // Cập nhật đơn vị chuyển đổi trong unitRows.
-          if (item.UnitId) {
-            var newUnit = this.units.find(
-              (itemUnit) => itemUnit.id === item.UnitId
-            );
-            this.unitRows[currentRowIndex].UnitId = newUnit.id;
           }
         });
 
@@ -913,17 +919,25 @@ export default {
     removeRow() {
       // Trường hợp tồn tại rowFocused thì xóa hàng đó.
       if (this.rowFocused > -1 && this.rowFocused < this.unitRows.length) {
-        this.unitRows.splice(this.rowFocused, 1);
+        const deleteRow = this.unitRows[this.rowFocused];
+        if (!deleteRow.UnitConversionId) {
+          this.unitRows.splice(this.rowFocused, 1);
+        } else {
+          if (deleteRow.Mode != this.$MEnum.MODE.DELETE) {
+            deleteRow.Mode = this.$MEnum.MODE.DELETE;
+          }
+        }
       }
       // Ngược lại thì xóa từ cuối hàng hoặc nếu đã có id thì chuyển editmode thành đã xóa.
       else {
         for (let i = this.unitRows.length - 1; i >= 0; i--) {
-          if (!this.unitRows[i].UnitConversionId) {
+          const deleteRow = this.unitRows[i];
+          if (!deleteRow.UnitConversionId) {
             this.unitRows.pop();
             break;
           } else {
-            if (this.unitRows[i].Mode != this.$MEnum.MODE.DELETE) {
-              this.unitRows[i].Mode = this.$MEnum.MODE.DELETE;
+            if (deleteRow.Mode != this.$MEnum.MODE.DELETE) {
+              deleteRow.Mode = this.$MEnum.MODE.DELETE;
               break;
             }
           }
