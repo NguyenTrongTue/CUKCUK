@@ -206,7 +206,9 @@
                     @click="handleEditCellUnit(indexRow, indexColumn)"
                   >
                     <span v-if="column.type === 'string'">{{
-                      item[column.field]
+                      column.field !== "Order"
+                        ? item[column.field]
+                        : indexRow + 1
                     }}</span>
                     <div v-else>
                       <div
@@ -240,8 +242,9 @@
                         <mcombobox
                           v-else-if="column.type === 'combobox'"
                           :data="operator"
-                          v-model="item[column.field]"
                           :ref="'input_' + indexRow + '_' + indexColumn"
+                          v-model="item[column.field]"
+                          :defaultValue="operator[0].id"
                         />
                       </div>
                       <span v-else>{{
@@ -348,7 +351,7 @@
     </template>
   </mpopup>
 
-  <mloading v-if="isLoading" />
+  <mloading v-if="isLoading" :typeLoading="1" />
 
   <mdialog
     v-if="showDialog"
@@ -417,14 +420,18 @@ export default {
       required: true,
     },
     /**
-     * Chế độ form: thêm, nhân bản, sửa
+     * Chế độ form truyền từ ngoài vào: thêm, nhân bản, sửa
      */
-    formMode: {
+    formModeProp: {
       type: Number,
     },
   },
   data() {
     return {
+      /**
+       * Chế độ form: thêm, nhân bản, sửa
+       */
+      formMode: this.formModeProp,
       /**
        * Tiêu đề cột trong bảng đơn vị chuyển đổi.
        */
@@ -605,7 +612,6 @@ export default {
       try {
         if (newValue && newValue.trim()) {
           var newMaterialCode = "";
-
           if (this.formMode === this.$MEnum.formMode.update) {
             newMaterialCode =
               createPrefixCode(newValue) +
@@ -645,6 +651,7 @@ export default {
               message: this.$MResources.ucIsDuplicatedWithUnitCode,
               handleClose: () => {
                 this.$refs["UnitId"].focus();
+                this.$refs["UnitId"].assignInputValue(this.materialEdit.UnitId);
               },
             });
           }
@@ -1324,6 +1331,9 @@ export default {
         this.closeForm();
       } else {
         this.handleResetDataForm();
+        this.getNewMaterialCodeAsync();
+        this.formMode = this.$MEnum.SUBMIT_MODE.ADD;
+        this.$refs[this.refsList[0]].focus();
       }
     },
 
@@ -1332,14 +1342,12 @@ export default {
      * @author: nttue (20/08/2023)
      */
     handleResetDataForm() {
-      this.startingMaterial = {
+      const newMaterial = {
         ExpiryType: this.$MResources.dayLabel,
         Category: this.$MResources.materials,
       };
-      this.materialEdit = {
-        ExpiryType: this.$MResources.dayLabel,
-        Category: this.$MResources.materials,
-      };
+      this.startingMaterial = { ...newMaterial };
+      this.materialEdit = { ...newMaterial };
       this.unitConversionsAtFirst = [];
       this.unitRows = [];
       this.prevUnitConversions = [];

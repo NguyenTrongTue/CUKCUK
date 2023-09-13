@@ -167,12 +167,14 @@ export default {
     async handleConfirmDelete() {
       try {
         // Thực hiện call API để xóa NVL.
-        await this.baseService.delete(this.rowChoosed.id);
-        // Gọi commit để hiện toast thông báo về tình trạng xóa.
-        this.$store.dispatch("showToast", {
-          label: this.$MResources.ToastMessage[this.nameList].delete,
-        });
-        this.handleReload();
+        const response = await this.baseService.delete(this.rowChoosed.id);
+        if (!response.errorCode) {
+          // Gọi commit để hiện toast thông báo về tình trạng xóa.
+          this.$store.dispatch("showToast", {
+            label: this.$MResources.ToastMessage[this.nameList].delete,
+          });
+          this.handleReload();
+        }
         this.handleCloseDialogDelete();
       } catch (e) {
         this.handleCloseDialogDelete();

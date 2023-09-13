@@ -50,7 +50,15 @@ export const validate = {
   maxlength_10(value, message) {
     return !value || value.length <= 10 ? undefined : message;
   },
-
+  /**
+   * Hàm kiểm tra xem độ dài 1 chuỗi có lơn 20 ký tự không.
+   * @param {String} value Giá trị cần kiểm
+   * @param {String} message Thông báo lỗi tương ứng.
+   * @returns Trả về thông báo lỗi nếu có, ngược lại undifined.
+   */
+  maxlength_20(value, message) {
+    return !value || value.length <= 20 ? undefined : message;
+  },
   /**
    * Hàm kiểm tra xem độ dài 1 chuỗi có lơn 100 ký tự không.
    * @param {String} value Giá trị cần kiểm

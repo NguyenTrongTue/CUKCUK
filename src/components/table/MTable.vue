@@ -404,34 +404,6 @@ export default {
   },
 
   methods: {
-    assingValueFilter(type) {
-      if (type === "input-allowDecimal") {
-        return {
-          typeFilterMode: 7,
-          value: 0,
-        };
-      } else if (type === "combobox") {
-        return {
-          value: 0,
-        };
-      } else {
-        return {
-          typeFilterMode: 0,
-          value: "",
-        };
-      }
-    },
-    assignFilter(columns) {
-      var filters = columns.map((column) => {
-        var result = this.assignFilter(column.typeFilter);
-        return {
-          field: column.field,
-          ...result,
-        };
-      });
-
-      return filters;
-    },
     /**
      * Hàm bắt sự kiện người dụng click vào ô th của thanh thead
      * Lúc này table sẽ tự động cuộn chuột đến vị trí đó.
@@ -657,21 +629,6 @@ export default {
      */
     handleHideFilter() {
       this.indexFilter = -1;
-    },
-
-    /**
-     * Hàm mở context để lựu chọn chế độ lọc dữ liệu của cột đó.
-     * @author: nttue (20/08/2023)
-     */
-    onFilter(event, index) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (this.indexFilter == index) {
-        this.indexFilter = -1;
-      } else {
-        this.indexFilter = index;
-      }
     },
 
     /**

@@ -187,6 +187,13 @@ export default {
     showingComboboxProp: {
       type: String,
     },
+    /**
+     * Giá trị mặc định của combobox nếu tab ra ngoài mà chưa chọn giá trị nào thì sẽ chọn giá trị mặc định.
+     */
+    defaultValue: {
+      type: String,
+      required: false,
+    },
   },
   data() {
     return {
@@ -293,7 +300,7 @@ export default {
      * @param {String} value giá trị của inputed
      * @author: nttue (29/08/2023)
      */
-    inputValue(newValue) {
+    inputValue() {
       this.error = "";
     },
   },
@@ -372,7 +379,7 @@ export default {
         this.inputValue = this.dataList[this.indexHover].name;
       } else {
         if (!this.inputValue) {
-          this.$emit("update:modelValue", "");
+          this.$emit("update:modelValue", this.defaultValue || "");
         } else {
           const item = this.findNameById(this.modelValue);
           if (item) {

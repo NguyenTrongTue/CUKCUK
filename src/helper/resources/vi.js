@@ -7,7 +7,7 @@ export const vi = {
   Unit: {
     UnitCode: {
       required: "Đơn vị tính không được phép để trống",
-      maxlength_10: "Đơn vị tính liệu không được phép vượt quá 10 ký tự",
+      maxlength_20: "Đơn vị tính liệu không được phép vượt quá 20 ký tự",
     },
   },
   Stock: {
@@ -16,7 +16,7 @@ export const vi = {
     },
     StockCode: {
       required: "Mã kho không được phép để trống",
-      maxlength_10: "Mã kho không được phép vượt quá 10 ký tự",
+      maxlength_20: "Mã kho không được phép vượt quá 20 ký tự",
     },
     StockName: {
       required: "Tên kho không được phép để trống",
@@ -30,7 +30,7 @@ export const vi = {
     },
     MaterialGroupCode: {
       required: "Mã nhóm nguyên vật liệu không được phép để trống",
-      maxlength_10: "Mã nhóm nguyên vật liệu không được phép vượt quá 10 ký tự",
+      maxlength_20: "Mã nhóm nguyên vật liệu không được phép vượt quá 20 ký tự",
     },
     MaterialGroupName: {
       required: "Tên nhóm nguyên vật liệu không được phép để trống",

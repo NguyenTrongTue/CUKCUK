@@ -50,7 +50,7 @@
     <MaterialForm
       v-if="showForm"
       :material="materialEdit"
-      :formMode="formMode"
+      :formModeProp="formMode"
       @onClose="handleCloseForm"
       @onReload="handleReload"
     />

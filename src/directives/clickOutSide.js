@@ -19,4 +19,3 @@ export const clickOutsideDirective = {
     delete el._clickOutside;
   },
 };
-

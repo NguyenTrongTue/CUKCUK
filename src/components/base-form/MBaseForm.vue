@@ -152,7 +152,9 @@ export default {
   beforeMount() {
     this.$emitter.on("duplicateCode", () => {
       this.$nextTick(() => {
-        this.$refs[this.formData[0].name][0].focus();
+        if (this.$refs[this.formData[0].name][0]) {
+          this.$refs[this.formData[0].name][0].focus();
+        }
       });
     });
   },

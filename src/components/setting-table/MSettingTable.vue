@@ -8,9 +8,7 @@
           </span>
         </div>
         <div class="popup-header-icon flex-start" @click="onExit">
-          <mtooltip :content="this.$MResources.Close + ' (Esc)'">
-            <div class="icon-close-white pointer"></div>
-          </mtooltip>
+          <div class="icon-close-white pointer"></div>
         </div>
       </div>
       <div class="setting-table-container">
