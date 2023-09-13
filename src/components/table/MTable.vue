@@ -139,7 +139,6 @@
     style="width: 100%"
     class="no-data flex-center"
   >
-    <img src="@/assets/icon/bg-nodata.svg" alt="" />
     <p class="no-data-desc">
       {{ this.$MResources.NoData }}
     </p>
@@ -147,6 +146,7 @@
 </template>
 
 <script>
+
 import TypeFilter from "@/components/table/type-filter/TypeFilter.vue";
 import valueConversion from "@/utils/valueConversion";
 import { resizeColumn } from "@/utils/common";

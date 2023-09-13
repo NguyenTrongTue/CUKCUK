@@ -596,7 +596,10 @@ export default {
     // Thực hiện focus vào ô input đầu tiên khi mở form lên.
     this.$refs[this.refsList[0]].focus();
     // Thực hiện call api để lấy mã mới nhất từ be.
-    this.getNewMaterialCodeAsync();
+
+    if (this.formMode != this.$MEnum.formMode.update) {
+      this.getNewMaterialCodeAsync();
+    }
     if (this.$refs.tableHeader) {
       this.tableHeaderHeight =
         this.$refs.tableHeader.getBoundingClientRect().height + 2;
@@ -897,7 +900,6 @@ export default {
         }
       });
     },
-
     /**
      * Hàm thực hiện thêm một hàng vào bảng đơn vị chuyển đổi.
      * @author: nttue (20/08/2023)
@@ -1223,6 +1225,22 @@ export default {
 
     // MARK: Các hàm xử lý sự kiện khi lưu form.
     /**
+     * Hàm thực hiện lưu form.
+     * @author: nttue (20/08/2023)
+     */
+    handleSaveForm() {
+      this.handleSaveMaterial(this.$MEnum.SUBMIT_MODE.ADD);
+    },
+
+    /**
+     * Hàm thực hiện lưu form và thêm mới mới.
+     * @author: nttue (20/08/2023)
+     */
+    handleSaveAndAdd() {
+      this.handleSaveMaterial(this.$MEnum.SUBMIT_MODE.ADD_AND_CREATE);
+    },
+
+    /**
      * @description Hàm thực hiện kiểm tra xem các input có lỗi không
      * nếu không gửi sự kiện đóng form và thêm mới nhân viên
      * nếu có lỗi thì bắn ra một dialog để cảnh báo cho người dùng
@@ -1301,7 +1319,7 @@ export default {
       const response = await materialService.post(materialInput);
 
       if (!response.errorCode) {
-        this.handleMaterialUpdateSuccess(mode);
+        this.handleMaterialUpdateSuccess(mode, "create");
       }
     },
 
@@ -1318,7 +1336,7 @@ export default {
       );
 
       if (!response.errorCode) {
-        this.handleMaterialUpdateSuccess(mode);
+        this.handleMaterialUpdateSuccess(mode, "update");
       }
     },
 
@@ -1327,10 +1345,10 @@ export default {
      * @param {Number} mode chế độ form.
      * @author: nttue (20/08/2023)
      */
-    handleMaterialUpdateSuccess(mode) {
+    handleMaterialUpdateSuccess(mode, toast) {
       this.$emit("onReload");
       this.$store.dispatch("showToast", {
-        label: this.$MResources.ToastMessage["Material"].update,
+        label: this.$MResources.ToastMessage["Material"][toast],
       });
       this.handleNonEditedMaterial(mode);
     },
@@ -1407,22 +1425,6 @@ export default {
       }
       // Trả về giá trị indexUnitIdError
       return { indexUnitIdError, indexConversionRateError };
-    },
-
-    /**
-     * Hàm thực hiện lưu form.
-     * @author: nttue (20/08/2023)
-     */
-    handleSaveForm() {
-      this.handleSaveMaterial(this.$MEnum.SUBMIT_MODE.ADD);
-    },
-
-    /**
-     * Hàm thực hiện lưu form và thêm mới mới.
-     * @author: nttue (20/08/2023)
-     */
-    handleSaveAndAdd() {
-      this.handleSaveMaterial(this.$MEnum.SUBMIT_MODE.ADD_AND_CREATE);
     },
 
     //MARK: Hàm thực hiện nhiệm vụ: tìm item trong mảng theo id
